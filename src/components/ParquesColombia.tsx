@@ -2,6 +2,9 @@
 
 import { useMemo, useState } from "react";
 import Dice3D from "@/components/Dice3D";
+/* eslint-disable @typescript-eslint/no-explicit-any */
+
+
 
 /* ================== Tipos / Constantes ================== */
 

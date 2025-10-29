@@ -12,6 +12,8 @@ type Props = {
   size?: number;
 };
 
+/* eslint-disable @typescript-eslint/no-explicit-any */
+
 /** Rotaciones para dejar cada cara al frente (sistema de ejes coherente) */
 const FACE_TRANSFORM: Record<number, string> = {
   1: "rotateX(0deg) rotateY(0deg) rotateZ(0deg)",     // front
