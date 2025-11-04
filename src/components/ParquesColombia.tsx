@@ -85,52 +85,36 @@ const START_POS: Record<ColorKey, number> = {
   red: 63, blue: 21, green: 49, yellow: 35
 };
 
-// ⭐ PUNTOS CRÍTICOS: Último seguro antes de girar a zona de llegada
 const LAST_SAFE_BEFORE_HOME: Record<ColorKey, number> = {
-  red: 67,    // 67 es el último seguro, luego gira a zona roja
-  blue: 25,   // 25 es el último seguro, luego gira a zona azul
-  green: 53,  // 53 es el último seguro, luego gira a zona verde
-  yellow: 39  // 39 es el último seguro, luego gira a zona amarilla
+  red: 67,
+  blue: 25,
+  green: 53,
+  yellow: 39
 };
 
-// ⭐ ENTRADA A ZONA DE LLEGADA (después del último seguro)
 const HOME_ENTRY: Record<ColorKey, number> = {
-  red: 68,    // Entrada a zona roja
-  blue: 26,   // Entrada a zona azul
-  green: 54,  // Entrada a zona verde
-  yellow: 40  // Entrada a zona amarilla
+  red: 68,
+  blue: 26,
+  green: 54,
+  yellow: 40
 };
 
 const SAFE_CELLS = new Set([15, 25, 29, 39, 43, 53, 57, 67]);
 
-const EXIT_CELLS = new Set([63, 21, 49, 35]);
-
-const EXIT_COLORS: Record<number, string> = {
-  63: "#ef4444",
-  21: "#3b82f6",
-  49: "#22c55e",
-  35: "#fbbf24",
-};
+// ✅ REMOVIDAS ESTAS LÍNEAS QUE CAUSABAN ERROR:
+// const EXIT_CELLS = new Set([63, 21, 49, 35]);
+// const EXIT_COLORS: Record<number, string> = { ... };
 
 // ==================== FUNCIONES DE MOVIMIENTO ====================
 
-/**
- * FUNCIÓN 1: Calcula la nueva posición después de mover N casillas
- * Sentido DECRECIENTE en tablero circular
- * Al llegar al último seguro, GIRA a zona de llegada del color
- */
 function calculateNewPosition(
   currentPos: number,
   steps: number,
   color: ColorKey
 ): number {
-  // Si está en cárcel (-1), no puede moverse
   if (currentPos === -1) return -1;
-
-  // Si ya llegó a home (999), permanece
   if (currentPos === 999) return 999;
 
-  // ⭐ YA ESTÁ EN ZONA DE LLEGADA: Avanza linealmente
   if (currentPos >= 100) {
     const finalPath = FINAL_PATHS[color];
     const currentIdx = finalPath.indexOf(currentPos);
@@ -139,34 +123,26 @@ function calculateNewPosition(
     
     const newIdx = currentIdx + steps;
     
-    // Verifica si llega a home (última casilla)
     if (newIdx >= finalPath.length - 1) {
-      return 999; // ¡LLEGÓ A HOME!
+      return 999;
     }
     
     return finalPath[newIdx];
   }
 
-  // ⭐ ESTÁ EN TABLERO CIRCULAR: Desciende N casillas
   if (currentPos >= 5 && currentPos <= 68) {
     let newPos = currentPos - steps;
     
-    // Wrap-around: si es menor a 5, vuelve por el otro lado
     if (newPos < 5) {
       newPos = 68 - (5 - newPos - 1);
     }
 
-    // ⭐ PUNTO CRÍTICO: Si llega al último seguro de su color, gira a zona de llegada
     const lastSafe = LAST_SAFE_BEFORE_HOME[color];
-    const homeEntry = HOME_ENTRY[color];
 
-    // Si pasó el último seguro, entra a zona de llegada
     if (currentPos > lastSafe && newPos <= lastSafe) {
-      // Calcula cuántos pasos faltaron después del último seguro
       const stepsAfterLastSafe = lastSafe - newPos;
       const finalPath = FINAL_PATHS[color];
       
-      // Comienza en zona de llegada
       return finalPath[stepsAfterLastSafe] || finalPath[0];
     }
 
@@ -176,20 +152,15 @@ function calculateNewPosition(
   return currentPos;
 }
 
-/**
- * FUNCIÓN 2: Detecta si hay captura y envía ficha capturada a cárcel
- */
 function checkCapture(
   newPos: number,
   capturingColor: ColorKey,
   players: Player[]
 ): { captured: boolean; capturedTokenId?: string; capturedColor?: ColorKey } {
-  // No hay captura en casillas seguras ni en final path ni en home
   if (SAFE_CELLS.has(newPos) || newPos >= 100 || newPos === 999) {
     return { captured: false };
   }
 
-  // Busca si hay ficha de otro color en esa posición
   for (const player of players) {
     if (player.color === capturingColor) continue;
     
@@ -207,15 +178,11 @@ function checkCapture(
   return { captured: false };
 }
 
-/**
- * FUNCIÓN 3: Valida si puede llegar exacto a home
- */
 function canReachHome(
   currentPos: number,
   steps: number,
   color: ColorKey
 ): boolean {
-  // Si está en camino final, debe caer exacto
   if (currentPos >= 100) {
     const finalPath = FINAL_PATHS[color];
     const currentIdx = finalPath.indexOf(currentPos);
@@ -386,7 +353,6 @@ export default function ParquesColombia() {
     const diceToUse = !usedDice[0] ? dice1 : dice2;
     const isPair = dice1 === dice2;
     
-    // REGLA: Solo puede salir con pares
     if (token.pos === -1) {
       if (!isPair) {
         setHint("Solo sales con pares");
@@ -397,45 +363,38 @@ export default function ParquesColombia() {
       return;
     }
 
-    // Calcula nueva posición
     const newPos = calculateNewPosition(token.pos, diceToUse, currentColor);
 
-    // Si es en camino final, debe caer exacto
     if (token.pos >= 100 && !canReachHome(token.pos, diceToUse, currentColor)) {
       setHint("Debes caer exacto en la meta");
       return;
     }
 
-    // Si no puede moverse (mismo lugar)
     if (newPos === token.pos) {
       setHint("No hay movimiento posible");
       markDiceUsed();
       return;
     }
 
-    // Detecta captura
     const captureResult = checkCapture(newPos, currentColor, [...players]);
 
-    // Actualiza el estado con captura si aplica
     const newPlayers = [...players];
     if (captureResult.captured && captureResult.capturedTokenId) {
       const capturedPlayer = newPlayers.find(p => p.color === captureResult.capturedColor);
       if (capturedPlayer) {
         const capturedToken = capturedPlayer.tokens.find(t => t.id === captureResult.capturedTokenId);
         if (capturedToken) {
-          capturedToken.pos = -1; // Envía a cárcel
+          capturedToken.pos = -1;
         }
       }
     }
 
-    // Actualiza la ficha que se mueve
     moveToken(tokenIdx, newPos);
     
     if (captureResult.captured) {
       setHint(`¡${COLORS[currentColor].label} capturó a ${COLORS[captureResult.capturedColor!].label}! 🎯`);
     }
 
-    // Marca dado como usado
     markDiceUsed();
   }
 
@@ -444,7 +403,6 @@ export default function ParquesColombia() {
     const playerIdx = newPlayers.findIndex(p => p.color === currentColor);
     
     if (newPos === 999) {
-      // ¡LLEGÓ A HOME!
       newPlayers[playerIdx].finished++;
       newPlayers[playerIdx].tokens.splice(tokenIdx, 1);
       
@@ -626,7 +584,8 @@ function DiceContainer({
         }`}
       >
         {value === 0 ? (
-          <div style={{ ["--dice-size" as any]: "100px" }}>
+          // ✅ FIXED: Eliminado el "as any"
+          <div style={{ "--dice-size": "100px" } as React.CSSProperties}>
             <Dice3D onRoll={onRoll} size={100} disabled={disabled} />
           </div>
         ) : (
@@ -778,30 +737,25 @@ function BoardSVG({
         );
       })}
 
-      {/* Centro con triángulos correctos */}
       <g>
         <circle cx={cell * 7.5} cy={cell * 7.5} r={cell * 1.3} 
                 fill="#ffd700" stroke="#000" strokeWidth="4" />
         
-        {/* Triángulo ARRIBA - VERDE */}
         <path 
           d={`M ${cell * 7.5} ${cell * 6.2} L ${cell * 6.7} ${cell * 7.5} L ${cell * 8.3} ${cell * 7.5} Z`}
           fill={COLORS.green.hex} stroke="#000" strokeWidth="2"
         />
         
-        {/* Triángulo DERECHA - ROJO */}
         <path 
           d={`M ${cell * 8.8} ${cell * 7.5} L ${cell * 7.5} ${cell * 6.7} L ${cell * 7.5} ${cell * 8.3} Z`}
           fill={COLORS.red.hex} stroke="#000" strokeWidth="2"
         />
         
-        {/* Triángulo IZQUIERDA - AMARILLO */}
         <path 
           d={`M ${cell * 6.2} ${cell * 7.5} L ${cell * 7.5} ${cell * 6.7} L ${cell * 7.5} ${cell * 8.3} Z`}
           fill={COLORS.yellow.hex} stroke="#000" strokeWidth="2"
         />
         
-        {/* Triángulo ABAJO - AZUL */}
         <path 
           d={`M ${cell * 7.5} ${cell * 8.8} L ${cell * 6.7} ${cell * 7.5} L ${cell * 8.3} ${cell * 7.5} Z`}
           fill={COLORS.blue.hex} stroke="#000" strokeWidth="2"
