@@ -25,62 +25,8 @@ const COLORS: Record<ColorKey, { hex: string; label: string }> = {
   yellow: { hex: "#fbbf24", label: "AMARILLO" },
 };
 
-// Mapa de posiciones del tablero (casilla -> [x, y])
-// Basado en el tablero real de Parqués colombiano
-const BOARD_MAP: Record<number, [number, number]> = {
-  // Recorrido ROJO (comienza en casilla 5)
-  5: [9, 6], 6: [10, 6], 7: [11, 6], 8: [12, 6], 9: [13, 6], 10: [14, 6],
-  11: [14, 7], 12: [14, 8],
-  
-  // AZUL (comienza en casilla 22)
-  13: [13, 8], 14: [12, 8], 15: [11, 8], 16: [10, 8], 17: [9, 8], 18: [8, 8],
-  19: [8, 9], 20: [8, 10], 21: [8, 11], 22: [8, 12], 23: [8, 13], 24: [8, 14],
-  25: [7, 14], 26: [6, 14],
-  
-  // VERDE (comienza en casilla 39)
-  27: [6, 13], 28: [6, 12], 29: [6, 11], 30: [6, 10], 31: [6, 9], 32: [6, 8],
-  33: [5, 8], 34: [4, 8], 35: [3, 8], 36: [2, 8], 37: [1, 8], 38: [0, 8],
-  39: [0, 7], 40: [0, 6],
-  
-  // AMARILLO (comienza en casilla 56)
-  41: [1, 6], 42: [2, 6], 43: [3, 6], 44: [4, 6], 45: [5, 6], 46: [6, 6],
-  47: [6, 5], 48: [6, 4], 49: [6, 3], 50: [6, 2], 51: [6, 1], 52: [6, 0],
-  53: [7, 0], 54: [8, 0],
-  
-  // Completar el círculo
-  55: [8, 1], 56: [8, 2], 57: [8, 3], 58: [8, 4], 59: [8, 5], 60: [8, 6],
-  
-  // Últimas antes de volver al inicio
-  61: [9, 6], 62: [10, 6], 63: [11, 6], 64: [12, 6], 65: [13, 6], 66: [14, 6],
-  67: [14, 7], 68: [14, 8],
-};
-
-// Rectas finales (8 casillas cada color)
-const FINAL_PATHS: Record<ColorKey, number[]> = {
-  red: [100, 101, 102, 103, 104, 105, 106, 107],
-  blue: [110, 111, 112, 113, 114, 115, 116, 117],
-  green: [120, 121, 122, 123, 124, 125, 126, 127],
-  yellow: [130, 131, 132, 133, 134, 135, 136, 137],
-};
-
-// Posiciones de rectas finales
-const FINAL_MAP: Record<number, [number, number]> = {
-  // ROJO (horizontal hacia la izquierda)
-  100: [13, 7], 101: [12, 7], 102: [11, 7], 103: [10, 7], 
-  104: [9, 7], 105: [8, 7], 106: [7, 7], 107: [7, 7],
-  
-  // AZUL (vertical hacia abajo)
-  110: [7, 13], 111: [7, 12], 112: [7, 11], 113: [7, 10],
-  114: [7, 9], 115: [7, 8], 116: [7, 7], 117: [7, 7],
-  
-  // VERDE (horizontal hacia la derecha)
-  120: [1, 7], 121: [2, 7], 122: [3, 7], 123: [4, 7],
-  124: [5, 7], 125: [6, 7], 126: [7, 7], 127: [7, 7],
-  
-  // AMARILLO (vertical hacia arriba)
-  130: [7, 1], 131: [7, 2], 132: [7, 3], 133: [7, 4],
-  134: [7, 5], 135: [7, 6], 136: [7, 7], 137: [7, 7],
-};
+// Total: 100 casillas
+// 68 en anillo exterior + 8 rectas finales × 4 colores = 100
 
 const START_POS: Record<ColorKey, number> = {
   red: 5, blue: 22, green: 39, yellow: 56
@@ -95,7 +41,7 @@ const SAFE_CELLS = new Set([5, 12, 22, 29, 39, 46, 56, 63]);
 const nextPlayer = (p: ColorKey): ColorKey =>
   p === "red" ? "blue" : p === "blue" ? "green" : p === "green" ? "yellow" : "red";
 
-/* ================== Componente Principal (mismo que antes) ================== */
+/* ================== Componente Principal (mantener igual) ================== */
 
 export default function ParquesColombia() {
   const [gamePhase, setGamePhase] = useState<GamePhase>("order");
@@ -183,7 +129,7 @@ export default function ParquesColombia() {
       const order = sorted.map(r => r.color);
       setPlayerOrder(order);
       setGamePhase("playing");
-      setHint(`Comienza ${COLORS[order[0]].label}. Lanza para intentar sacar pares.`);
+      setHint(`Comienza ${COLORS[order[0]].label}. Lanza para sacar pares.`);
       
       setTimeout(() => {
         setDice1(0);
@@ -191,7 +137,7 @@ export default function ParquesColombia() {
         setDiceRolled(false);
       }, 2000);
     } else {
-      setHint(`${COLORS[playerColor].label}: ${sum}. Siguiente jugador.`);
+      setHint(`${COLORS[playerColor].label}: ${sum}. Siguiente.`);
       setTimeout(() => {
         setDice1(0);
         setDice2(0);
@@ -222,17 +168,17 @@ export default function ParquesColombia() {
     
     if (allInJail) {
       if (isPair) {
-        setHint(`¡Pares! ${dice1} y ${value}. Saca una ficha.`);
+        setHint(`¡Pares! ${dice1}=${value}. Saca ficha.`);
         setPairAttempts(0);
       } else {
         const newAttempts = pairAttempts + 1;
         setPairAttempts(newAttempts);
         
         if (newAttempts >= 3) {
-          setHint(`3 intentos sin pares. Pasa turno.`);
+          setHint(`3 intentos. Pasa turno.`);
           setTimeout(() => passTurn(), 2000);
         } else {
-          setHint(`Sin pares (${3 - newAttempts} intentos). Intenta de nuevo.`);
+          setHint(`Sin pares. ${3 - newAttempts} intentos.`);
           setTimeout(() => {
             setDice1(0);
             setDice2(0);
@@ -242,18 +188,15 @@ export default function ParquesColombia() {
       }
     } else {
       if (isPair) {
-        setHint(`¡Pares! ${dice1} y ${value}. Mueve y tira de nuevo.`);
+        setHint(`¡Pares! Mueve y tira de nuevo.`);
       } else {
-        setHint(`Dados: ${dice1} y ${value}. Mueve tus fichas.`);
+        setHint(`${dice1} y ${value}. Mueve.`);
       }
     }
   }
 
   function handleTokenClick(tokenIdx: number) {
-    if (!diceRolled || gamePhase !== "playing") {
-      setHint("Primero lanza los dados");
-      return;
-    }
+    if (!diceRolled || gamePhase !== "playing") return;
 
     const token = currentPlayer.tokens[tokenIdx];
     const diceToUse = !usedDice[0] ? dice1 : dice2;
@@ -261,7 +204,7 @@ export default function ParquesColombia() {
     
     if (token.pos === -1) {
       if (!isPair) {
-        setHint("Solo puedes salir con pares");
+        setHint("Solo sales con pares");
         return;
       }
       moveToken(tokenIdx, START_POS[currentColor]);
@@ -277,22 +220,22 @@ export default function ParquesColombia() {
       const entryPoint = FINAL_ENTRY[currentColor];
       if (token.pos < entryPoint && newPos >= entryPoint) {
         const remaining = newPos - entryPoint;
-        const finalPath = FINAL_PATHS[currentColor];
-        newPos = finalPath[remaining] || finalPath[finalPath.length - 1];
+        const finalStart = 100 + (["red", "blue", "green", "yellow"].indexOf(currentColor) * 8);
+        newPos = finalStart + remaining;
       } else if (newPos > 68) {
-        newPos = newPos % 68 || 68;
+        newPos = ((newPos - 1) % 68) + 1;
       }
     } else {
-      const finalPath = FINAL_PATHS[currentColor];
-      const currentIdx = finalPath.indexOf(token.pos);
-      const newIdx = currentIdx + diceToUse;
+      const finalStart = 100 + (["red", "blue", "green", "yellow"].indexOf(currentColor) * 8);
+      const currentOffset = token.pos - finalStart;
+      const newOffset = currentOffset + diceToUse;
       
-      if (newIdx === 8) {
+      if (newOffset === 8) {
         newPos = 999;
-      } else if (newIdx < 8) {
-        newPos = finalPath[newIdx];
+      } else if (newOffset < 8) {
+        newPos = finalStart + newOffset;
       } else {
-        setHint("Debes caer exactamente en la llegada");
+        setHint("Debes caer exacto");
         return;
       }
     }
@@ -324,7 +267,7 @@ export default function ParquesColombia() {
       if (newPlayers[playerIdx].tokens.length === 0) {
         setWinner(newPlayers[playerIdx].name);
       } else {
-        setHint(`¡Meta! Quedan ${newPlayers[playerIdx].tokens.length} fichas.`);
+        setHint(`¡Meta! ${4 - newPlayers[playerIdx].tokens.length}/4`);
       }
     } else {
       newPlayers[playerIdx].tokens[tokenIdx].pos = newPos;
@@ -348,7 +291,7 @@ export default function ParquesColombia() {
           setDice2(0);
           setUsedDice([false, false]);
           setDiceRolled(false);
-          setHint("¡Pares! Lanza de nuevo");
+          setHint("¡Pares! Tira de nuevo");
         }, 800);
       } else {
         setTimeout(() => passTurn(), 1000);
@@ -366,20 +309,20 @@ export default function ParquesColombia() {
     setDiceRolled(false);
     
     const nextColor = playerOrder[nextIndex];
-    setHint(`Turno de ${COLORS[nextColor].label}`);
+    setHint(`Turno: ${COLORS[nextColor].label}`);
   }
 
   if (winner) {
     return (
       <div className="w-full text-center py-12">
         <h1 className="text-5xl font-bold mb-4 text-yellow-400">
-          🏆 ¡{winner} GANÓ! 🏆
+          🏆 {winner} GANÓ! 🏆
         </h1>
         <button
           onClick={() => window.location.reload()}
-          className="px-6 py-3 bg-gradient-to-r from-yellow-500 to-orange-500 hover:from-yellow-600 hover:to-orange-600 text-white font-bold rounded-lg transition-all shadow-lg"
+          className="px-6 py-3 bg-gradient-to-r from-yellow-500 to-orange-500 hover:from-yellow-600 hover:to-orange-600 text-white font-bold rounded-lg shadow-lg"
         >
-          Jugar de nuevo
+          Nueva partida
         </button>
       </div>
     );
@@ -389,37 +332,35 @@ export default function ParquesColombia() {
     <div className="w-full">
       <div className="text-center mb-4">
         {gamePhase === "order" ? (
-          <div className="inline-block px-6 py-3 rounded-full bg-gradient-to-r from-purple-500/20 to-pink-500/20 border-2 border-purple-500/50 backdrop-blur-sm mb-2">
-            <span className="text-lg font-bold text-purple-300">
-              🎲 Determinando Orden
-            </span>
+          <div className="inline-block px-6 py-3 rounded-full bg-gradient-to-r from-purple-500/20 to-pink-500/20 border-2 border-purple-500/50 backdrop-blur-sm">
+            <span className="text-lg font-bold text-purple-300">🎲 Orden</span>
           </div>
         ) : (
           <div 
-            className="inline-block px-6 py-3 rounded-full border-2 backdrop-blur-sm mb-2"
+            className="inline-block px-6 py-3 rounded-full border-2 backdrop-blur-sm"
             style={{ 
               borderColor: COLORS[currentColor].hex,
               backgroundColor: `${COLORS[currentColor].hex}25`
             }}
           >
             <span className="text-lg font-bold" style={{ color: COLORS[currentColor].hex }}>
-              Turno: {currentPlayer?.name} ({COLORS[currentColor].label})
+              {currentPlayer?.name} ({COLORS[currentColor].label})
             </span>
           </div>
         )}
         
-        <p className="text-sm text-gray-300 dark:text-gray-400 mb-1">{hint}</p>
+        <p className="text-sm text-gray-300 mb-1">{hint}</p>
         
         {gamePhase === "playing" && (
           <div className="flex justify-center gap-4 text-xs text-gray-400">
-            <span>En meta: {currentPlayer?.finished || 0}/4</span>
-            {pairAttempts > 0 && <span>Intentos: {pairAttempts}/3</span>}
+            <span>Meta: {currentPlayer?.finished || 0}/4</span>
+            {pairAttempts > 0 && <span>{pairAttempts}/3</span>}
           </div>
         )}
         
         {diceRolled && (
           <p className="text-xs text-gray-400 mt-1">
-            Dados: {dice1} {usedDice[0] ? "✓" : "○"} | {dice2} {usedDice[1] ? "✓" : "○"}
+            {dice1} {usedDice[0] ? "✓" : "○"} | {dice2} {usedDice[1] ? "✓" : "○"}
           </p>
         )}
       </div>
@@ -454,12 +395,12 @@ export default function ParquesColombia() {
       </div>
 
       {gamePhase === "playing" && playerOrder.length > 0 && (
-        <div className="mt-6 flex justify-center gap-2">
+        <div className="mt-6 flex justify-center gap-2 flex-wrap">
           {playerOrder.map((color, idx) => (
             <div 
               key={color}
               className={`px-4 py-2 rounded-lg border-2 transition-all ${
-                idx === currentPlayerIndex ? 'scale-110 shadow-lg' : 'opacity-50'
+                idx === currentPlayerIndex ? 'scale-110' : 'opacity-50'
               }`}
               style={{ 
                 borderColor: COLORS[color].hex,
@@ -467,7 +408,7 @@ export default function ParquesColombia() {
               }}
             >
               <span className="text-sm font-bold" style={{ color: COLORS[color].hex }}>
-                {idx + 1}º {COLORS[color].label}
+                {idx + 1}° {COLORS[color].label}
               </span>
             </div>
           ))}
@@ -477,7 +418,7 @@ export default function ParquesColombia() {
   );
 }
 
-/* ================== Componentes Dados (igual que antes) ================== */
+/* ================== Dados (mantener igual) ================== */
 
 function DiceContainer({ 
   value, 
@@ -496,11 +437,11 @@ function DiceContainer({
 }) {
   return (
     <div className="flex flex-col items-center gap-2">
-      <p className="text-xs text-gray-300 dark:text-gray-400 font-semibold">{label}</p>
+      <p className="text-xs text-gray-400 font-semibold">{label}</p>
       <div 
-        className={`relative w-28 h-28 rounded-xl shadow-2xl border-3 border-gray-700 dark:border-gray-600 bg-gradient-to-br from-gray-900 to-gray-800 backdrop-blur flex items-center justify-center transition-all ${
+        className={`relative w-28 h-28 rounded-xl shadow-2xl border-3 border-gray-700 bg-gradient-to-br from-gray-900 to-gray-800 flex items-center justify-center ${
           used ? 'opacity-40' : ''
-        } ${disabled && value === 0 ? 'opacity-50' : ''}`}
+        }`}
       >
         {value === 0 ? (
           <div style={{ ["--dice-size" as any]: "100px" }}>
@@ -510,12 +451,8 @@ function DiceContainer({
           <DiceFace value={value} />
         )}
       </div>
-      {!disabled && value === 0 && (
-        <p className="text-xs text-green-400 font-medium">🎲 Click</p>
-      )}
-      {waitingForFirst && (
-        <p className="text-xs text-gray-500">...</p>
-      )}
+      {!disabled && value === 0 && <p className="text-xs text-green-400">🎲</p>}
+      {waitingForFirst && <p className="text-xs text-gray-500">...</p>}
     </div>
   );
 }
@@ -533,13 +470,13 @@ function DiceFace({ value }: { value: number }) {
   return (
     <svg viewBox="0 0 100 100" className="w-18 h-18">
       {dots[value]?.map(([x, y], i) => (
-        <circle key={i} cx={x} cy={y} r="9" fill="#ffffff" />
+        <circle key={i} cx={x} cy={y} r="9" fill="#fff" />
       ))}
     </svg>
   );
 }
 
-/* ================== Tablero SVG CON CASILLAS ================== */
+/* ================== Tablero SVG CON CASILLAS RECTANGULARES ALARGADAS ================== */
 
 function BoardSVG({
   players,
@@ -552,25 +489,208 @@ function BoardSVG({
   onTokenClick: (idx: number) => void;
   gamePhase: GamePhase;
 }) {
-  const size = 750;
-  const cell = 50; // Tamaño de cada casilla
+  const size = 800;
+  const patioSize = 180;
+  const cellWidth = 40; // Ancho de casilla
+  const cellHeight = 70; // Alto de casilla (más alargado)
+
+  // Función para obtener posición de casilla
+  function getCellPosition(pos: number): { x: number; y: number; width: number; height: number; rotation: number } {
+    // Patios (-1)
+    if (pos === -1) return { x: 0, y: 0, width: 0, height: 0, rotation: 0 };
+    
+    // Centro (999)
+    if (pos === 999) return { x: size / 2, y: size / 2, width: 0, height: 0, rotation: 0 };
+
+    // Anillo exterior (1-68)
+    if (pos >= 1 && pos <= 68) {
+      // Lado superior derecho (5-12) - ROJO
+      if (pos >= 5 && pos <= 12) {
+        const offset = pos - 5;
+        return {
+          x: patioSize + 60 + (offset * cellWidth),
+          y: patioSize,
+          width: cellWidth,
+          height: cellHeight,
+          rotation: 0
+        };
+      }
+      
+      // Lado derecho vertical (13-21) - AZUL
+      if (pos >= 13 && pos <= 21) {
+        const offset = pos - 13;
+        return {
+          x: size - patioSize - cellHeight,
+          y: patioSize + 60 + (offset * cellWidth),
+          width: cellHeight,
+          height: cellWidth,
+          rotation: 90
+        };
+      }
+      
+      // Salida AZUL (22)
+      if (pos === 22) {
+        return {
+          x: size - patioSize - cellHeight,
+          y: patioSize + 60 + (9 * cellWidth),
+          width: cellHeight,
+          height: cellWidth,
+          rotation: 90
+        };
+      }
+      
+      // Lado derecho hasta esquina inferior (23-29)
+      if (pos >= 23 && pos <= 29) {
+        const offset = pos - 23;
+        return {
+          x: size - patioSize - cellHeight,
+          y: patioSize + 60 + ((9 + offset) * cellWidth),
+          width: cellHeight,
+          height: cellWidth,
+          rotation: 90
+        };
+      }
+      
+      // Lado inferior derecho (30-38) - VERDE
+      if (pos >= 30 && pos <= 38) {
+        const offset = 38 - pos;
+        return {
+          x: patioSize + 60 + (offset * cellWidth),
+          y: size - patioSize - cellHeight,
+          width: cellWidth,
+          height: cellHeight,
+          rotation: 180
+        };
+      }
+      
+      // Salida VERDE (39)
+      if (pos === 39) {
+        return {
+          x: patioSize - cellWidth,
+          y: size - patioSize - cellHeight,
+          width: cellWidth,
+          height: cellHeight,
+          rotation: 180
+        };
+      }
+      
+      // Lado izquierdo vertical (40-46)
+      if (pos >= 40 && pos <= 46) {
+        const offset = 46 - pos;
+        return {
+          x: patioSize - cellHeight,
+          y: patioSize + 60 + (offset * cellWidth),
+          width: cellHeight,
+          height: cellWidth,
+          rotation: 270
+        };
+      }
+      
+      // Lado izquierdo hasta esquina superior (47-55)
+      if (pos >= 47 && pos <= 55) {
+        const offset = 55 - pos;
+        return {
+          x: patioSize - cellHeight,
+          y: 60 + (offset * cellWidth),
+          width: cellHeight,
+          height: cellWidth,
+          rotation: 270
+        };
+      }
+      
+      // Salida AMARILLO (56)
+      if (pos === 56) {
+        return {
+          x: patioSize - cellHeight,
+          y: 60,
+          width: cellHeight,
+          height: cellWidth,
+          rotation: 270
+        };
+      }
+      
+      // Completar hasta llegar a 5 (57-68)
+      if (pos >= 57 && pos <= 68) {
+        const offset = 68 - pos;
+        return {
+          x: patioSize + 60 + (offset * cellWidth),
+          y: 60,
+          width: cellWidth,
+          height: cellHeight,
+          rotation: 0
+        };
+      }
+    }
+
+    // Rectas finales (100-131)
+    if (pos >= 100 && pos < 132) {
+      const colorOffset = Math.floor((pos - 100) / 8);
+      const cellOffset = (pos - 100) % 8;
+      
+      // ROJO (100-107)
+      if (colorOffset === 0) {
+        return {
+          x: size / 2 + 60 + (cellOffset * cellWidth),
+          y: size / 2 - cellHeight / 2,
+          width: cellWidth,
+          height: cellHeight,
+          rotation: 0
+        };
+      }
+      
+      // AZUL (108-115)
+      if (colorOffset === 1) {
+        return {
+          x: size / 2 - cellHeight / 2,
+          y: size / 2 + 60 + (cellOffset * cellWidth),
+          width: cellHeight,
+          height: cellWidth,
+          rotation: 90
+        };
+      }
+      
+      // VERDE (116-123)
+      if (colorOffset === 2) {
+        return {
+          x: size / 2 - 60 - ((cellOffset + 1) * cellWidth),
+          y: size / 2 - cellHeight / 2,
+          width: cellWidth,
+          height: cellHeight,
+          rotation: 180
+        };
+      }
+      
+      // AMARILLO (124-131)
+      if (colorOffset === 3) {
+        return {
+          x: size / 2 - cellHeight / 2,
+          y: size / 2 - 60 - ((cellOffset + 1) * cellWidth),
+          width: cellHeight,
+          height: cellWidth,
+          rotation: 270
+        };
+      }
+    }
+
+    return { x: 0, y: 0, width: 0, height: 0, rotation: 0 };
+  }
 
   const jailPositions: Record<ColorKey, [number, number][]> = {
-    red: [
-      [cell * 10.5, cell * 1], [cell * 12, cell * 1],
-      [cell * 10.5, cell * 2.5], [cell * 12, cell * 2.5]
-    ],
-    blue: [
-      [cell * 1, cell * 10.5], [cell * 2.5, cell * 10.5],
-      [cell * 1, cell * 12], [cell * 2.5, cell * 12]
-    ],
     green: [
-      [cell * 1, cell * 1], [cell * 2.5, cell * 1],
-      [cell * 1, cell * 2.5], [cell * 2.5, cell * 2.5]
+      [50, 50], [120, 50],
+      [50, 120], [120, 120]
+    ],
+    red: [
+      [size - 170, 50], [size - 100, 50],
+      [size - 170, 120], [size - 100, 120]
     ],
     yellow: [
-      [cell * 10.5, cell * 10.5], [cell * 12, cell * 10.5],
-      [cell * 10.5, cell * 12], [cell * 12, cell * 12]
+      [50, size - 170], [120, size - 170],
+      [50, size - 100], [120, size - 100]
+    ],
+    blue: [
+      [size - 170, size - 170], [size - 100, size - 170],
+      [size - 170, size - 100], [size - 100, size - 100]
     ],
   };
 
@@ -580,30 +700,18 @@ function BoardSVG({
     }
     
     if (pos === 999) {
-      return [cell * 7.5, cell * 7.5];
+      return [size / 2, size / 2];
     }
     
-    // Buscar en recta final
-    if (FINAL_MAP[pos]) {
-      const [gridX, gridY] = FINAL_MAP[pos];
-      return [gridX * cell + cell / 2, gridY * cell + cell / 2];
-    }
-    
-    // Buscar en tablero principal
-    if (BOARD_MAP[pos]) {
-      const [gridX, gridY] = BOARD_MAP[pos];
-      return [gridX * cell + cell / 2, gridY * cell + cell / 2];
-    }
-    
-    return [cell * 7.5, cell * 7.5];
+    const cell = getCellPosition(pos);
+    return [cell.x + cell.width / 2, cell.y + cell.height / 2];
   }
 
-  const allTokens = players.flatMap((p, pidx) =>
+  const allTokens = players.flatMap((p) =>
     p.tokens.map((t, tidx) => ({
       color: p.color,
       pos: t.pos,
       id: t.id,
-      playerIdx: pidx,
       tokenIdx: tidx,
     }))
   );
@@ -611,71 +719,69 @@ function BoardSVG({
   return (
     <svg 
       viewBox={`0 0 ${size} ${size}`} 
-      className="w-full max-w-[750px] drop-shadow-2xl rounded-2xl"
+      className="w-full max-w-[800px] drop-shadow-2xl rounded-2xl"
       style={{ background: '#d4a574' }}
     >
       {/* Patios */}
-      <rect x={0} y={0} width={cell * 4} height={cell * 4} 
-            fill={COLORS.green.hex} stroke="#000" strokeWidth="4" rx="12" />
-      <rect x={cell * 11} y={0} width={cell * 4} height={cell * 4} 
-            fill={COLORS.red.hex} stroke="#000" strokeWidth="4" rx="12" />
-      <rect x={0} y={cell * 11} width={cell * 4} height={cell * 4} 
-            fill={COLORS.yellow.hex} stroke="#000" strokeWidth="4" rx="12" />
-      <rect x={cell * 11} y={cell * 11} width={cell * 4} height={cell * 4} 
-            fill={COLORS.blue.hex} stroke="#000" strokeWidth="4" rx="12" />
+      <rect x={0} y={0} width={patioSize} height={patioSize} 
+            fill={COLORS.green.hex} stroke="#000" strokeWidth="4" rx="16" />
+      <rect x={size - patioSize} y={0} width={patioSize} height={patioSize} 
+            fill={COLORS.red.hex} stroke="#000" strokeWidth="4" rx="16" />
+      <rect x={0} y={size - patioSize} width={patioSize} height={patioSize} 
+            fill={COLORS.yellow.hex} stroke="#000" strokeWidth="4" rx="16" />
+      <rect x={size - patioSize} y={size - patioSize} width={patioSize} height={patioSize} 
+            fill={COLORS.blue.hex} stroke="#000" strokeWidth="4" rx="16" />
 
-      {/* Dibujar casillas del recorrido */}
-      {Object.entries(BOARD_MAP).map(([pos, [x, y]]) => {
-        const cellPos = parseInt(pos);
-        const isSafe = SAFE_CELLS.has(cellPos);
+      {/* Textos */}
+      <text x={90} y={90} fontSize="20" fontWeight="bold" fill="#fff">SALIDA</text>
+      <text x={size - 140} y={90} fontSize="20" fontWeight="bold" fill="#fff">SALIDA</text>
+      <text x={90} y={size - 80} fontSize="20" fontWeight="bold" fill="#fff">SALIDA</text>
+      <text x={size - 140} y={size - 80} fontSize="20" fontWeight="bold" fill="#fff">SALIDA</text>
+
+      {/* Casillas del anillo (1-68) */}
+      {Array.from({ length: 68 }, (_, i) => i + 1).map((pos) => {
+        const cell = getCellPosition(pos);
+        const isSafe = SAFE_CELLS.has(pos);
         
         return (
           <rect
             key={`cell-${pos}`}
-            x={x * cell}
-            y={y * cell}
-            width={cell}
-            height={cell}
-            fill={isSafe ? "#fff" : "#e8d4a0"}
+            x={cell.x}
+            y={cell.y}
+            width={cell.width}
+            height={cell.height}
+            fill={isSafe ? "#fff" : "#f5e6c8"}
             stroke="#000"
             strokeWidth="2"
           />
         );
       })}
 
-      {/* Casillas de rectas finales */}
-      {Object.entries(FINAL_MAP).map(([pos, [x, y]]) => {
-        const cellPos = parseInt(pos);
-        let fill = "#fff";
-        
-        if (FINAL_PATHS.red.includes(cellPos)) fill = COLORS.red.hex + "80";
-        else if (FINAL_PATHS.blue.includes(cellPos)) fill = COLORS.blue.hex + "80";
-        else if (FINAL_PATHS.green.includes(cellPos)) fill = COLORS.green.hex + "80";
-        else if (FINAL_PATHS.yellow.includes(cellPos)) fill = COLORS.yellow.hex + "80";
+      {/* Casillas rectas finales (100-131) */}
+      {Array.from({ length: 32 }, (_, i) => i + 100).map((pos) => {
+        const cell = getCellPosition(pos);
+        const colorIdx = Math.floor((pos - 100) / 8);
+        const colors = [COLORS.red.hex, COLORS.blue.hex, COLORS.green.hex, COLORS.yellow.hex];
         
         return (
           <rect
             key={`final-${pos}`}
-            x={x * cell}
-            y={y * cell}
-            width={cell}
-            height={cell}
-            fill={fill}
+            x={cell.x}
+            y={cell.y}
+            width={cell.width}
+            height={cell.height}
+            fill={colors[colorIdx] + "80"}
             stroke="#000"
             strokeWidth="2"
           />
         );
       })}
 
-      {/* Centro (llegada) */}
-      <circle cx={cell * 7.5} cy={cell * 7.5} r={cell * 0.8} 
-              fill="#ffd700" stroke="#000" strokeWidth="3" />
-
-      {/* Textos */}
-      <text x={cell * 2} y={cell * 2.5} fontSize="18" fontWeight="bold" fill="#fff">SALIDA</text>
-      <text x={cell * 11.5} y={cell * 2.5} fontSize="18" fontWeight="bold" fill="#fff">SALIDA</text>
-      <text x={cell * 2} y={cell * 12.5} fontSize="18" fontWeight="bold" fill="#fff">SALIDA</text>
-      <text x={cell * 11.5} y={cell * 12.5} fontSize="18" fontWeight="bold" fill="#fff">SALIDA</text>
+      {/* Centro */}
+      <circle cx={size / 2} cy={size / 2} r={50} 
+              fill="#ffd700" stroke="#000" strokeWidth="4" />
+      <text x={size / 2} y={size / 2 + 8} fontSize="24" fontWeight="bold" 
+            fill="#000" textAnchor="middle">META</text>
 
       {/* Fichas */}
       {allTokens.map((t) => {
@@ -692,13 +798,13 @@ function BoardSVG({
               <circle
                 cx={x}
                 cy={y}
-                r={cell * 0.35}
+                r={22}
                 fill={COLORS[t.color].hex}
                 opacity="0.4"
               >
                 <animate
                   attributeName="r"
-                  values={`${cell * 0.3};${cell * 0.4};${cell * 0.3}`}
+                  values="18;26;18"
                   dur="1.5s"
                   repeatCount="indefinite"
                 />
@@ -707,16 +813,16 @@ function BoardSVG({
             <circle
               cx={x}
               cy={y}
-              r={cell * 0.28}
+              r={18}
               fill={COLORS[t.color].hex}
               stroke="#000"
               strokeWidth="3"
-              filter="drop-shadow(0 3px 6px rgba(0,0,0,0.5))"
+              filter="drop-shadow(0 4px 8px rgba(0,0,0,0.5))"
             />
             <circle
-              cx={x - cell * 0.1}
-              cy={y - cell * 0.1}
-              r={cell * 0.1}
+              cx={x - 6}
+              cy={y - 6}
+              r={6}
               fill="rgba(255,255,255,0.7)"
             />
           </g>
