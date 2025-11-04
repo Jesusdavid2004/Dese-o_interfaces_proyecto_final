@@ -3,6 +3,21 @@
 import { useState } from "react";
 import Dice3D from "@/components/Dice3D";
 
+/* ================ 🎨 COLORES - CAMBIA AQUÍ ================ */
+const THEME = {
+  // Colores principales
+  colorRojo: "#ef4444",
+  colorAzul: "#3b82f6",
+  colorVerde: "#22c55e",
+  colorAmarillo: "#fbbf24",
+  
+  // Otros colores
+  colorBeige: "#e8d4a0",
+  colorBlanco: "#FFFFFF",
+  colorDorado: "#ffd700",
+  colorFondo: "#d4a574",
+};
+
 type ColorKey = "red" | "blue" | "green" | "yellow";
 type Token = { pos: number; id: string };
 type Player = { 
@@ -16,69 +31,38 @@ type Player = {
 type GamePhase = "order" | "playing";
 
 const COLORS: Record<ColorKey, { hex: string; label: string }> = {
-  red:    { hex: "#ef4444", label: "ROJO" },
-  blue:   { hex: "#3b82f6", label: "AZUL" },
-  green:  { hex: "#22c55e", label: "VERDE" },
-  yellow: { hex: "#fbbf24", label: "AMARILLO" },
+  red:    { hex: THEME.colorRojo, label: "ROJO" },
+  blue:   { hex: THEME.colorAzul, label: "AZUL" },
+  green:  { hex: THEME.colorVerde, label: "VERDE" },
+  yellow: { hex: THEME.colorAmarillo, label: "AMARILLO" },
 };
 
 const BOARD_MAP: Record<number, [number, number]> = {
-  // ROJO (5-12)
   5: [9, 6], 6: [10, 6], 7: [11, 6], 8: [12, 6], 9: [13, 6], 10: [14, 6],
   11: [14, 7], 12: [14, 8],
   
-  // AZUL (13-26)
   13: [13, 8], 14: [12, 8], 15: [11, 8], 16: [10, 8], 17: [9, 8], 18: [8, 8],
   19: [8, 9], 20: [8, 10], 21: [8, 11], 22: [8, 12], 23: [8, 13], 24: [8, 14],
   25: [7, 14], 26: [6, 14],
   
-  // VERDE (27-40)
   27: [6, 13], 28: [6, 12], 29: [6, 11], 30: [6, 10], 31: [6, 9], 32: [6, 8],
   33: [5, 8], 34: [4, 8], 35: [3, 8], 36: [2, 8], 37: [1, 8], 38: [0, 8],
   39: [0, 7], 40: [0, 6],
   
-  // AMARILLO (41-54)
   41: [1, 6], 42: [2, 6], 43: [3, 6], 44: [4, 6], 45: [5, 6], 46: [6, 6],
   47: [6, 5], 48: [6, 4], 49: [6, 3], 50: [6, 2], 51: [6, 1], 52: [6, 0],
   53: [7, 0], 54: [8, 0],
   
-  // Conectar
   55: [8, 1], 56: [8, 2], 57: [8, 3], 58: [8, 4], 59: [8, 5], 60: [8, 6],
   61: [9, 6], 62: [10, 6], 63: [11, 6], 64: [12, 6], 65: [13, 6], 66: [14, 6],
   67: [14, 7], 68: [14, 8],
 };
 
-const BOARD_COLORS: Record<number, string> = {
-  // ROJO (5-12): 1 roja + blancas + 1 roja final
-  5: "#ef4444", 6: "#e8d4a0", 7: "#e8d4a0", 8: "#e8d4a0", 9: "#e8d4a0", 10: "#e8d4a0",
-  11: "#e8d4a0", 12: "#ef4444",
-
-  // AZUL (13-26): azules + 2 blancas (23, 25) + azul
-  13: "#e8d4a0", 14: "#e8d4a0", 15: "#e8d4a0", 16: "#e8d4a0", 17: "#e8d4a0", 18: "#3b82f6",
-  19: "#3b82f6", 20: "#3b82f6", 21: "#3b82f6", 22: "#3b82f6", 23: "#FFFFFF", 24: "#3b82f6",
-  25: "#FFFFFF", 26: "#3b82f6",
-
-  // VERDE (27-40): 2 verdes + 1 blanca (30) + verdes
-  27: "#e8d4a0", 28: "#22c55e", 29: "#22c55e", 30: "#FFFFFF", 31: "#22c55e", 32: "#22c55e",
-  33: "#22c55e", 34: "#22c55e", 35: "#22c55e", 36: "#e8d4a0", 37: "#e8d4a0", 38: "#e8d4a0",
-  39: "#22c55e", 40: "#e8d4a0",
-
-  // AMARILLO (41-54): 3 amarillas + 1 blanca (45) + amarillas
-  41: "#e8d4a0", 42: "#fbbf24", 43: "#fbbf24", 44: "#fbbf24", 45: "#FFFFFF", 46: "#fbbf24",
-  47: "#fbbf24", 48: "#fbbf24", 49: "#fbbf24", 50: "#e8d4a0", 51: "#e8d4a0", 52: "#e8d4a0",
-  53: "#fbbf24", 54: "#e8d4a0",
-
-  // Conectar (55-68)
-  55: "#e8d4a0", 56: "#e8d4a0", 57: "#e8d4a0", 58: "#e8d4a0", 59: "#e8d4a0", 60: "#e8d4a0",
-  61: "#e8d4a0", 62: "#e8d4a0", 63: "#FFFFFF", 64: "#e8d4a0", 65: "#e8d4a0", 66: "#e8d4a0",
-  67: "#e8d4a0", 68: "#e8d4a0",
-};
-
 const FINAL_PATHS: Record<ColorKey, number[]> = {
   red: [100, 101, 102, 103, 104, 105, 106, 107],
   blue: [110, 111, 112, 113, 114, 115, 116, 117],
-  green: [130, 131, 132, 133, 134, 135, 136, 137],  // Verde va al centro
-  yellow: [120, 121, 122, 123, 124, 125, 126, 127],  // Amarillo va a la izquierda
+  green: [130, 131, 132, 133, 134, 135, 136, 137],
+  yellow: [120, 121, 122, 123, 124, 125, 126, 127],
 };
 
 const FINAL_MAP: Record<number, [number, number]> = {
@@ -104,6 +88,15 @@ const FINAL_ENTRY: Record<ColorKey, number> = {
 };
 
 const SAFE_CELLS = new Set([5, 12, 22, 23, 25, 30, 39, 45, 53, 63]);
+
+const EXIT_CELLS = new Set([5, 22, 39, 56]);
+
+const EXIT_COLORS: Record<number, string> = {
+  5: THEME.colorRojo,
+  22: THEME.colorAzul,
+  39: THEME.colorVerde,
+  56: THEME.colorAmarillo,
+};
 
 const nextPlayer = (p: ColorKey): ColorKey =>
   p === "red" ? "green" : p === "green" ? "yellow" : p === "yellow" ? "blue" : "red";
@@ -607,20 +600,29 @@ function BoardSVG({
     <svg 
       viewBox={`0 0 ${size} ${size}`} 
       className="w-full max-w-[850px] drop-shadow-2xl rounded-2xl"
-      style={{ background: '#d4a574' }}
+      style={{ background: THEME.colorFondo }}
     >
+      {/* Patios */}
       <rect x={0} y={0} width={cell * 4} height={cell * 4} 
-            fill={COLORS.green.hex} stroke="#000" strokeWidth="4" rx="16" />
+            fill={THEME.colorVerde} stroke="#000" strokeWidth="4" rx="16" />
       <rect x={cell * 11} y={0} width={cell * 4} height={cell * 4} 
-            fill={COLORS.red.hex} stroke="#000" strokeWidth="4" rx="16" />
+            fill={THEME.colorRojo} stroke="#000" strokeWidth="4" rx="16" />
       <rect x={0} y={cell * 11} width={cell * 4} height={cell * 4} 
-            fill={COLORS.yellow.hex} stroke="#000" strokeWidth="4" rx="16" />
+            fill={THEME.colorAmarillo} stroke="#000" strokeWidth="4" rx="16" />
       <rect x={cell * 11} y={cell * 11} width={cell * 4} height={cell * 4} 
-            fill={COLORS.blue.hex} stroke="#000" strokeWidth="4" rx="16" />
+            fill={THEME.colorAzul} stroke="#000" strokeWidth="4" rx="16" />
 
+      {/* Casillas */}
       {Object.entries(BOARD_MAP).map(([pos, [x, y]]) => {
         const cellPos = parseInt(pos);
-        const fill = BOARD_COLORS[cellPos] || "#e8d4a0";
+        let fill = THEME.colorBeige;
+        
+        if (SAFE_CELLS.has(cellPos) && !EXIT_CELLS.has(cellPos)) {
+          fill = THEME.colorBlanco;
+        }
+        else if (EXIT_CELLS.has(cellPos)) {
+          fill = EXIT_COLORS[cellPos] + "DD";
+        }
         
         return (
           <rect
@@ -636,14 +638,15 @@ function BoardSVG({
         );
       })}
 
+      {/* Rectas finales */}
       {Object.entries(FINAL_MAP).map(([pos, [x, y]]) => {
         const cellPos = parseInt(pos);
-        let fill = "#fff";
+        let fill = THEME.colorBlanco;
         
-        if (FINAL_PATHS.red.includes(cellPos)) fill = COLORS.red.hex + "99";
-        else if (FINAL_PATHS.blue.includes(cellPos)) fill = COLORS.blue.hex + "99";
-        else if (FINAL_PATHS.green.includes(cellPos)) fill = COLORS.green.hex + "99";
-        else if (FINAL_PATHS.yellow.includes(cellPos)) fill = COLORS.yellow.hex + "99";
+        if (FINAL_PATHS.red.includes(cellPos)) fill = THEME.colorRojo + "99";
+        else if (FINAL_PATHS.blue.includes(cellPos)) fill = THEME.colorAzul + "99";
+        else if (FINAL_PATHS.green.includes(cellPos)) fill = THEME.colorVerde + "99";
+        else if (FINAL_PATHS.yellow.includes(cellPos)) fill = THEME.colorAmarillo + "99";
         
         return (
           <rect
@@ -659,29 +662,30 @@ function BoardSVG({
         );
       })}
 
+      {/* Centro */}
       <g>
         <circle cx={cell * 7.5} cy={cell * 7.5} r={cell * 1.3} 
-                fill="#ffd700" stroke="#000" strokeWidth="4" />
+                fill={THEME.colorDorado} stroke="#000" strokeWidth="4" />
         
         <path 
           d={`M ${cell * 7.5} ${cell * 6.2} L ${cell * 6.7} ${cell * 7.5} L ${cell * 8.3} ${cell * 7.5} Z`}
-          fill={COLORS.red.hex} stroke="#000" strokeWidth="2"
+          fill={THEME.colorRojo} stroke="#000" strokeWidth="2"
         />
         <path 
           d={`M ${cell * 8.8} ${cell * 7.5} L ${cell * 7.5} ${cell * 6.7} L ${cell * 7.5} ${cell * 8.3} Z`}
-          fill={COLORS.blue.hex} stroke="#000" strokeWidth="2"
+          fill={THEME.colorAzul} stroke="#000" strokeWidth="2"
         />
         <path 
           d={`M ${cell * 6.2} ${cell * 7.5} L ${cell * 7.5} ${cell * 6.7} L ${cell * 7.5} ${cell * 8.3} Z`}
-          fill={COLORS.green.hex} stroke="#000" strokeWidth="2"
+          fill={THEME.colorVerde} stroke="#000" strokeWidth="2"
         />
         <path 
           d={`M ${cell * 7.5} ${cell * 8.8} L ${cell * 6.7} ${cell * 7.5} L ${cell * 8.3} ${cell * 7.5} Z`}
-          fill={COLORS.yellow.hex} stroke="#000" strokeWidth="2"
+          fill={THEME.colorAmarillo} stroke="#000" strokeWidth="2"
         />
         
         <circle cx={cell * 7.5} cy={cell * 7.5} r={cell * 0.5} 
-                fill="#fff" stroke="#000" strokeWidth="2" />
+                fill={THEME.colorBlanco} stroke="#000" strokeWidth="2" />
         <text x={cell * 7.5} y={cell * 7.7} fontSize="20" fontWeight="bold" 
               fill="#000" textAnchor="middle">🏆</text>
       </g>
