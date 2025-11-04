@@ -25,62 +25,61 @@ const COLORS: Record<ColorKey, { hex: string; label: string }> = {
   yellow: { hex: "#fbbf24", label: "AMARILLO" },
 };
 
-// MAPA EXACTO DEL TABLERO DIBUJADO A MANO
-// 68 casillas en el anillo (con seguros en blanco y salidas coloreadas)
+// MAPA EXACTO DEL TABLERO - 68 CASILLAS
 const BOARD_MAP: Record<number, [number, number]> = {
-  // ROJO - lado derecho superior (comienza en 5)
-  5: [9, 6], 6: [10, 6], 7: [11, 6], 8: [12, 6], 9: [13, 6], 10: [14, 6],
-  11: [14, 7], 12: [14, 8],
-  
-  // AZUL - lado derecho vertical (comienza en 22)
-  13: [13, 8], 14: [12, 8], 15: [11, 8], 16: [10, 8], 17: [9, 8], 18: [8, 8],
-  19: [8, 9], 20: [8, 10], 21: [8, 11], 22: [8, 12], 23: [8, 13], 24: [8, 14],
-  25: [7, 14], 26: [6, 14],
-  
-  // VERDE - lado izquierdo superior (comienza en 39)
+  // VERDE - lado superior izquierdo (comienza en 39)
   27: [6, 13], 28: [6, 12], 29: [6, 11], 30: [6, 10], 31: [6, 9], 32: [6, 8],
   33: [5, 8], 34: [4, 8], 35: [3, 8], 36: [2, 8], 37: [1, 8], 38: [0, 8],
   39: [0, 7], 40: [0, 6],
   
-  // AMARILLO - lado izquierdo inferior (comienza en 56)
+  // AMARILLO - lado inferior izquierdo (comienza en 56)
   41: [1, 6], 42: [2, 6], 43: [3, 6], 44: [4, 6], 45: [5, 6], 46: [6, 6],
   47: [6, 5], 48: [6, 4], 49: [6, 3], 50: [6, 2], 51: [6, 1], 52: [6, 0],
   53: [7, 0], 54: [8, 0],
   
-  // Completar el círculo
+  // ROJO - lado superior derecho (comienza en 5)
+  5: [9, 6], 6: [10, 6], 7: [11, 6], 8: [12, 6], 9: [13, 6], 10: [14, 6],
+  11: [14, 7], 12: [14, 8],
+  
+  // AZUL - lado inferior derecho (comienza en 22)
+  13: [13, 8], 14: [12, 8], 15: [11, 8], 16: [10, 8], 17: [9, 8], 18: [8, 8],
+  19: [8, 9], 20: [8, 10], 21: [8, 11], 22: [8, 12], 23: [8, 13], 24: [8, 14],
+  25: [7, 14], 26: [6, 14],
+  
+  // Conectar el círculo
   55: [8, 1], 56: [8, 2], 57: [8, 3], 58: [8, 4], 59: [8, 5], 60: [8, 6],
   61: [9, 6], 62: [10, 6], 63: [11, 6], 64: [12, 6], 65: [13, 6], 66: [14, 6],
   67: [14, 7], 68: [14, 8],
 };
 
-// COLORES POR TIPO DE CASILLA EN EL ANILLO
+// COLORES POR CASILLA - EXACTO DEL DIBUJO
 const BOARD_COLORS: Record<number, string> = {
-  // ROJO (5-12)
-  5: "#ef4444", 6: "#e8d4a0", 7: "#e8d4a0", 8: "#e8d4a0", 9: "#e8d4a0", 10: "#e8d4a0",
-  11: "#e8d4a0", 12: "#FFFFFF",
-  
-  // AZUL (13-26)
-  13: "#e8d4a0", 14: "#e8d4a0", 15: "#e8d4a0", 16: "#e8d4a0", 17: "#e8d4a0", 18: "#3b82f6",
-  19: "#3b82f6", 20: "#3b82f6", 21: "#3b82f6", 22: "#3b82f6", 23: "#e8d4a0", 24: "#e8d4a0",
-  25: "#e8d4a0", 26: "#FFFFFF",
-  
-  // VERDE (27-40)
+  // VERDE (27-40): 4 casillas verdes + 1 blanca + 4 verdes
   27: "#e8d4a0", 28: "#e8d4a0", 29: "#FFFFFF", 30: "#22c55e", 31: "#22c55e", 32: "#22c55e",
   33: "#22c55e", 34: "#22c55e", 35: "#22c55e", 36: "#e8d4a0", 37: "#e8d4a0", 38: "#e8d4a0",
   39: "#22c55e", 40: "#e8d4a0",
   
-  // AMARILLO (41-54)
+  // AMARILLO (41-54): 4 amarillas + 1 blanca + 4 amarillas
   41: "#e8d4a0", 42: "#e8d4a0", 43: "#e8d4a0", 44: "#fbbf24", 45: "#fbbf24", 46: "#FFFFFF",
   47: "#fbbf24", 48: "#fbbf24", 49: "#fbbf24", 50: "#e8d4a0", 51: "#e8d4a0", 52: "#e8d4a0",
   53: "#e8d4a0", 54: "#e8d4a0",
   
-  // COMPLETAR (55-68)
+  // ROJO (5-12): 4 rojas + 1 blanca + 4 rojas
+  5: "#ef4444", 6: "#ef4444", 7: "#ef4444", 8: "#ef4444", 9: "#e8d4a0", 10: "#e8d4a0",
+  11: "#e8d4a0", 12: "#FFFFFF",
+  
+  // AZUL (13-26): 4 azules + 1 blanca + 4 azules
+  13: "#e8d4a0", 14: "#e8d4a0", 15: "#e8d4a0", 16: "#e8d4a0", 17: "#e8d4a0", 18: "#3b82f6",
+  19: "#3b82f6", 20: "#3b82f6", 21: "#3b82f6", 22: "#3b82f6", 23: "#e8d4a0", 24: "#e8d4a0",
+  25: "#e8d4a0", 26: "#FFFFFF",
+  
+  // Conectar círculo (55-68)
   55: "#e8d4a0", 56: "#e8d4a0", 57: "#e8d4a0", 58: "#e8d4a0", 59: "#e8d4a0", 60: "#e8d4a0",
   61: "#e8d4a0", 62: "#e8d4a0", 63: "#FFFFFF", 64: "#e8d4a0", 65: "#e8d4a0", 66: "#e8d4a0",
   67: "#e8d4a0", 68: "#e8d4a0",
 };
 
-// Rectas finales (8 casillas cada color)
+// Rectas finales
 const FINAL_PATHS: Record<ColorKey, number[]> = {
   red: [100, 101, 102, 103, 104, 105, 106, 107],
   blue: [110, 111, 112, 113, 114, 115, 116, 117],
@@ -88,7 +87,6 @@ const FINAL_PATHS: Record<ColorKey, number[]> = {
   yellow: [130, 131, 132, 133, 134, 135, 136, 137],
 };
 
-// Posiciones de rectas finales
 const FINAL_MAP: Record<number, [number, number]> = {
   100: [13, 7], 101: [12, 7], 102: [11, 7], 103: [10, 7], 
   104: [9, 7], 105: [8, 7], 106: [7, 7], 107: [7, 7],
@@ -111,7 +109,7 @@ const FINAL_ENTRY: Record<ColorKey, number> = {
   red: 68, blue: 26, green: 40, yellow: 54
 };
 
-// 8 SEGUROS (casillas blancas)
+// 8 SEGUROS (blancas)
 const SAFE_CELLS = new Set([12, 26, 29, 46, 63]);
 
 const nextPlayer = (p: ColorKey): ColorKey =>
