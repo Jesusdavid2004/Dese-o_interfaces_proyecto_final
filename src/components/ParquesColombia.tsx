@@ -22,50 +22,57 @@ const COLORS: Record<ColorKey, { hex: string; label: string }> = {
   yellow: { hex: "#fbbf24", label: "AMARILLO" },
 };
 
+// RECORRIDO ÚNICO PARA TODOS A MANO DERECHA (1-62)
 const BOARD_MAP: Record<number, [number, number]> = {
-  5: [9, 6], 6: [10, 6], 7: [11, 6], 8: [12, 6], 9: [13, 6], 10: [14, 6],
-  11: [14, 7], 12: [14, 8],
+  // Lado derecho arriba - de derecha a izquierda
+  1: [14, 6], 2: [13, 6], 3: [12, 6], 4: [11, 6], 5: [10, 6], 6: [9, 6],
+  7: [8, 6], 8: [8, 5], 9: [8, 4], 10: [8, 3], 11: [8, 2], 12: [8, 1],
+  13: [8, 0], 14: [7, 0], 15: [6, 0],
   
-  13: [13, 8], 14: [12, 8], 15: [11, 8], 16: [10, 8], 17: [9, 8], 18: [8, 8],
-  19: [8, 9], 20: [8, 10], 21: [8, 11], 22: [8, 12], 23: [8, 13], 24: [8, 14],
-  25: [7, 14], 26: [6, 14],
+  // Lado izquierdo arriba - bajando
+  16: [6, 1], 17: [6, 2], 18: [6, 3], 19: [6, 4], 20: [6, 5], 21: [6, 6],
+  22: [5, 6], 23: [4, 6], 24: [3, 6], 25: [2, 6], 26: [1, 6], 27: [0, 6],
+  28: [0, 7], 29: [0, 8],
   
-  27: [6, 13], 28: [6, 12], 29: [6, 11], 30: [6, 10], 31: [6, 9], 32: [6, 8],
-  33: [5, 8], 34: [4, 8], 35: [3, 8], 36: [2, 8], 37: [1, 8], 38: [0, 8],
-  39: [0, 7], 40: [0, 6],
+  // Lado izquierdo abajo - de izquierda a derecha
+  30: [1, 8], 31: [2, 8], 32: [3, 8], 33: [4, 8], 34: [5, 8], 35: [6, 8],
+  36: [6, 9], 37: [6, 10], 38: [6, 11], 39: [6, 12], 40: [6, 13], 41: [6, 14],
+  42: [7, 14], 43: [8, 14],
   
-  41: [1, 6], 42: [2, 6], 43: [3, 6], 44: [4, 6], 45: [5, 6], 46: [6, 6],
-  47: [6, 5], 48: [6, 4], 49: [6, 3], 50: [6, 2], 51: [6, 1], 52: [6, 0],
-  53: [7, 0], 54: [8, 0],
+  // Lado derecho abajo - subiendo
+  44: [8, 13], 45: [8, 12], 46: [8, 11], 47: [8, 10], 48: [8, 9], 49: [8, 8],
+  50: [9, 8], 51: [10, 8], 52: [11, 8], 53: [12, 8], 54: [13, 8], 55: [14, 8],
+  56: [14, 7], 57: [14, 6],
   
-  55: [8, 1], 56: [8, 2], 57: [8, 3], 58: [8, 4], 59: [8, 5], 60: [8, 6],
-  61: [9, 6], 62: [10, 6], 63: [11, 6], 64: [12, 6], 65: [13, 6], 66: [14, 6],
-  67: [14, 7], 68: [14, 8],
+  // Continuación
+  58: [13, 6], 59: [12, 6], 60: [11, 6], 61: [10, 6], 62: [9, 6],
 };
 
-/* 🎨 COLORES DE CADA CASILLA */
 const BOARD_COLORS: Record<number, string> = {
-  5: "#e8d4a0", 6: "#e8d4a0", 7: "#e8d4a0", 8: "#e8d4a0", 9: "#e8d4a0", 10: "#e8d4a0",
-  11: "#e8d4a0", 12: "#e8d4a0",
-  13: "#e8d4a0", 14: "#e8d4a0", 15: "#FFFFFF", 16: "#e8d4a0", 17: "#e8d4a0", 18: "#e8d4a0",
-  19: "#e8d4a0", 20: "#e8d4a0", 21: "#3b82f6", 22: "#e8d4a0", 23: "#e8d4a0", 24: "#e8d4a0",
-  25: "#FFFFFF", 26: "#e8d4a0",
-  27: "#e8d4a0", 28: "#e8d4a0", 29: "#FFFFFF", 30: "#e8d4a0", 31: "#e8d4a0", 32: "#e8d4a0",
-  33: "#e8d4a0", 34: "#e8d4a0", 35: "#fbbf24", 36: "#e8d4a0", 37: "#e8d4a0", 38: "#e8d4a0",
-  39: "#FFFFFF", 40: "#e8d4a0",
-  41: "#e8d4a0", 42: "#e8d4a0", 43: "#FFFFFF", 44: "#e8d4a0", 45: "#e8d4a0", 46: "#e8d4a0",
-  47: "#e8d4a0", 48: "#e8d4a0", 49: "#22c55e", 50: "#e8d4a0", 51: "#e8d4a0", 52: "#e8d4a0",
-  53: "#FFFFFF", 54: "#e8d4a0",
-  55: "#e8d4a0", 56: "#e8d4a0", 57: "#FFFFFF", 58: "#e8d4a0", 59: "#e8d4a0", 60: "#e8d4a0",
-  61: "#e8d4a0", 62: "#e8d4a0", 63: "#ef4444", 64: "#e8d4a0", 65: "#e8d4a0", 66: "#e8d4a0",
-  67: "#FFFFFF", 68: "#e8d4a0",
+  1: "#e8d4a0", 2: "#e8d4a0", 3: "#FFFFFF", 4: "#e8d4a0", 5: "#e8d4a0", 6: "#e8d4a0",
+  7: "#e8d4a0", 8: "#e8d4a0", 9: "#FFFFFF", 10: "#e8d4a0", 11: "#e8d4a0", 12: "#e8d4a0",
+  13: "#FFFFFF", 14: "#e8d4a0", 15: "#e8d4a0",
+  
+  16: "#FFFFFF", 17: "#e8d4a0", 18: "#e8d4a0", 19: "#e8d4a0", 20: "#e8d4a0", 21: "#e8d4a0",
+  22: "#e8d4a0", 23: "#FFFFFF", 24: "#e8d4a0", 25: "#e8d4a0", 26: "#e8d4a0", 27: "#e8d4a0",
+  28: "#FFFFFF", 29: "#e8d4a0",
+  
+  30: "#e8d4a0", 31: "#FFFFFF", 32: "#e8d4a0", 33: "#e8d4a0", 34: "#e8d4a0", 35: "#e8d4a0",
+  36: "#e8d4a0", 37: "#e8d4a0", 38: "#FFFFFF", 39: "#e8d4a0", 40: "#e8d4a0", 41: "#e8d4a0",
+  42: "#FFFFFF", 43: "#e8d4a0",
+  
+  44: "#e8d4a0", 45: "#e8d4a0", 46: "#FFFFFF", 47: "#e8d4a0", 48: "#e8d4a0", 49: "#e8d4a0",
+  50: "#e8d4a0", 51: "#e8d4a0", 52: "#FFFFFF", 53: "#e8d4a0", 54: "#e8d4a0", 55: "#e8d4a0",
+  56: "#FFFFFF", 57: "#e8d4a0",
+  
+  58: "#e8d4a0", 59: "#e8d4a0", 60: "#FFFFFF", 61: "#e8d4a0", 62: "#e8d4a0",
 };
 
 const FINAL_PATHS: Record<ColorKey, number[]> = {
   red: [100, 101, 102, 103, 104, 105, 106, 107],
   blue: [110, 111, 112, 113, 114, 115, 116, 117],
-  green: [130, 131, 132, 133, 134, 135, 136, 137],
-  yellow: [120, 121, 122, 123, 124, 125, 126, 127],
+  green: [120, 121, 122, 123, 124, 125, 126, 127],
+  yellow: [130, 131, 132, 133, 134, 135, 136, 137],
 };
 
 const FINAL_MAP: Record<number, [number, number]> = {
@@ -83,22 +90,22 @@ const FINAL_MAP: Record<number, [number, number]> = {
 };
 
 const START_POS: Record<ColorKey, number> = {
-  red: 63, blue: 21, green: 49, yellow: 35
+  red: 1, blue: 21, green: 41, yellow: 61
 };
 
 const FINAL_ENTRY: Record<ColorKey, number> = {
-  red: 68, blue: 26, green: 54, yellow: 40
+  red: 62, blue: 22, green: 42, yellow: 2
 };
 
-const SAFE_CELLS = new Set([15, 25, 29, 39, 43, 53, 57, 67]);
+const SAFE_CELLS = new Set([3, 9, 13, 16, 23, 28, 31, 38, 42, 46, 52, 56, 60]);
 
-const EXIT_CELLS = new Set([63, 21, 49, 35]);
+const EXIT_CELLS = new Set([1, 21, 41, 61]);
 
 const EXIT_COLORS: Record<number, string> = {
-  63: "#ef4444",
+  1: "#ef4444",
   21: "#3b82f6",
-  49: "#22c55e",
-  35: "#fbbf24",
+  41: "#22c55e",
+  61: "#fbbf24",
 };
 
 const nextPlayer = (p: ColorKey): ColorKey =>
@@ -279,12 +286,12 @@ export default function ParquesColombia() {
       newPos = token.pos + diceToUse;
       
       const entryPoint = FINAL_ENTRY[currentColor];
-      if (token.pos < entryPoint && newPos >= entryPoint) {
-        const remaining = newPos - entryPoint;
+      if (token.pos <= entryPoint && newPos > entryPoint) {
+        const remaining = newPos - entryPoint - 1;
         const finalPath = FINAL_PATHS[currentColor];
-        newPos = finalPath[remaining] || finalPath[finalPath.length - 1];
-      } else if (newPos > 68) {
-        newPos = ((newPos - 1) % 68) + 1;
+        newPos = finalPath[Math.min(remaining, finalPath.length - 1)];
+      } else if (newPos > 62) {
+        newPos = ((newPos - 1) % 62) + 1;
       }
     } else {
       const finalPath = FINAL_PATHS[currentColor];
@@ -309,7 +316,7 @@ export default function ParquesColombia() {
     const newPlayers = [...players];
     const playerIdx = newPlayers.findIndex(p => p.color === currentColor);
     
-    if (newPos >= 1 && newPos <= 68 && !SAFE_CELLS.has(newPos)) {
+    if (newPos >= 1 && newPos <= 62 && !SAFE_CELLS.has(newPos)) {
       for (let i = 0; i < newPlayers.length; i++) {
         if (i === playerIdx) continue;
         newPlayers[i].tokens.forEach(t => {
@@ -655,33 +662,33 @@ function BoardSVG({
         );
       })}
 
-      {/* Centro con triángulos de colores según llegada */}
+      {/* Centro - ROJO arriba, AZUL abajo */}
       <g>
         <circle cx={cell * 7.5} cy={cell * 7.5} r={cell * 1.3} 
                 fill="#ffd700" stroke="#000" strokeWidth="4" />
         
-        {/* Triángulo ARRIBA - ROJO llega horizontal desde la derecha */}
+        {/* Triángulo ARRIBA - ROJO */}
         <path 
           d={`M ${cell * 7.5} ${cell * 6.2} L ${cell * 6.7} ${cell * 7.5} L ${cell * 8.3} ${cell * 7.5} Z`}
           fill={COLORS.red.hex} stroke="#000" strokeWidth="2"
         />
         
-        {/* Triángulo DERECHA - AZUL llega vertical desde abajo */}
+        {/* Triángulo DERECHA - AMARILLO */}
         <path 
           d={`M ${cell * 8.8} ${cell * 7.5} L ${cell * 7.5} ${cell * 6.7} L ${cell * 7.5} ${cell * 8.3} Z`}
-          fill={COLORS.blue.hex} stroke="#000" strokeWidth="2"
-        />
-        
-        {/* Triángulo IZQUIERDA - AMARILLO llega horizontal desde la izquierda */}
-        <path 
-          d={`M ${cell * 6.2} ${cell * 7.5} L ${cell * 7.5} ${cell * 6.7} L ${cell * 7.5} ${cell * 8.3} Z`}
           fill={COLORS.yellow.hex} stroke="#000" strokeWidth="2"
         />
         
-        {/* Triángulo ABAJO - VERDE llega vertical desde arriba */}
+        {/* Triángulo IZQUIERDA - VERDE */}
+        <path 
+          d={`M ${cell * 6.2} ${cell * 7.5} L ${cell * 7.5} ${cell * 6.7} L ${cell * 7.5} ${cell * 8.3} Z`}
+          fill={COLORS.green.hex} stroke="#000" strokeWidth="2"
+        />
+        
+        {/* Triángulo ABAJO - AZUL */}
         <path 
           d={`M ${cell * 7.5} ${cell * 8.8} L ${cell * 6.7} ${cell * 7.5} L ${cell * 8.3} ${cell * 7.5} Z`}
-          fill={COLORS.green.hex} stroke="#000" strokeWidth="2"
+          fill={COLORS.blue.hex} stroke="#000" strokeWidth="2"
         />
         
         <circle cx={cell * 7.5} cy={cell * 7.5} r={cell * 0.5} 
