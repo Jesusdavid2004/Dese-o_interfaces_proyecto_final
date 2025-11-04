@@ -54,7 +54,6 @@ export default function ParquesColombia() {
     if (diceRolled) return;
     setDice2(value);
     
-    // Cuando el segundo dado termine de girar, evaluamos
     setDiceRolled(true);
     setUsedDice([false, false]);
     
@@ -74,7 +73,6 @@ export default function ParquesColombia() {
     const token = currentPlayer.tokens[tokenIdx];
     const diceToUse = !usedDice[0] ? dice1 : dice2;
     
-    // Salir de la cárcel con 5
     if (token.pos === -1) {
       if (dice1 !== 5 && dice2 !== 5 && dice1 + dice2 !== 5) {
         setHint("Necesitas un 5 para salir");
@@ -85,7 +83,6 @@ export default function ParquesColombia() {
       return;
     }
 
-    // Movimiento normal
     const newPos = (token.pos + diceToUse) % 68;
     moveToken(tokenIdx, newPos);
     markDiceUsed();
@@ -149,10 +146,10 @@ export default function ParquesColombia() {
         )}
       </div>
 
-      {/* Layout principal - MÁS GRANDE */}
+      {/* Layout principal */}
       <div className="flex flex-col lg:flex-row items-start justify-center gap-6">
         
-        {/* Tablero - Más grande */}
+        {/* Tablero */}
         <div className="flex-shrink-0">
           <BoardSVG 
             players={players}
@@ -176,6 +173,7 @@ export default function ParquesColombia() {
             onRoll={handleDice2Roll}
             label="Dado 2"
             disabled={diceRolled || dice1 === 0}
+            waitingForFirst={dice1 === 0}
           />
         </div>
       </div>
@@ -183,20 +181,22 @@ export default function ParquesColombia() {
   );
 }
 
-/* ================== Componente Dado - MEJORADO ================== */
+/* ================== Componente Dado - CORREGIDO ================== */
 
 function DiceContainer({ 
   value, 
   used,
   onRoll, 
   label,
-  disabled = false
+  disabled = false,
+  waitingForFirst = false
 }: { 
   value: number; 
   used: boolean;
   onRoll: (v: number) => void; 
   label: string;
   disabled?: boolean;
+  waitingForFirst?: boolean;
 }) {
   return (
     <div className="flex flex-col items-center gap-2">
@@ -217,7 +217,7 @@ function DiceContainer({
       {!disabled && value === 0 && (
         <p className="text-xs text-gray-400">Click aquí</p>
       )}
-      {disabled && value === 0 && dice1 === 0 && (
+      {waitingForFirst && (
         <p className="text-xs text-gray-500">Esperando...</p>
       )}
     </div>
@@ -243,7 +243,7 @@ function DiceFace({ value }: { value: number }) {
   );
 }
 
-/* ================== Tablero SVG - MÁS GRANDE ================== */
+/* ================== Tablero SVG ================== */
 
 function BoardSVG({
   players,
@@ -254,7 +254,7 @@ function BoardSVG({
   turn: ColorKey;
   onTokenClick: (idx: number) => void;
 }) {
-  const size = 680; // Aumentado de 560 a 680
+  const size = 680;
   const cell = size / 15;
 
   const jailPositions: Record<ColorKey, [number, number][]> = {
