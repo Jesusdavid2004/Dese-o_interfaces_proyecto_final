@@ -42,29 +42,28 @@ const BOARD_MAP: Record<number, [number, number]> = {
   47: [6, 5], 48: [6, 4], 49: [6, 3], 50: [6, 2], 51: [6, 1], 52: [6, 0],
   53: [7, 0], 54: [8, 0],
   
-  // Conectar círculo
+  // Conectar
   55: [8, 1], 56: [8, 2], 57: [8, 3], 58: [8, 4], 59: [8, 5], 60: [8, 6],
   61: [9, 6], 62: [10, 6], 63: [11, 6], 64: [12, 6], 65: [13, 6], 66: [14, 6],
   67: [14, 7], 68: [14, 8],
 };
 
-// COLORES EXACTOS SEGÚN LAS IMÁGENES
 const BOARD_COLORS: Record<number, string> = {
-  // ROJO (5-12): 3 rojas + 1 blanca (8) + más
-  5: "#ef4444", 6: "#ef4444", 7: "#ef4444", 8: "#FFFFFF", 9: "#e8d4a0", 10: "#e8d4a0",
+  // ROJO (5-12): 1 roja + blancas + 1 roja final
+  5: "#ef4444", 6: "#e8d4a0", 7: "#e8d4a0", 8: "#e8d4a0", 9: "#e8d4a0", 10: "#e8d4a0",
   11: "#e8d4a0", 12: "#ef4444",
 
-  // AZUL (13-26): azules + 1 blanca (23) + azul
+  // AZUL (13-26): azules + 2 blancas (23, 25) + azul
   13: "#e8d4a0", 14: "#e8d4a0", 15: "#e8d4a0", 16: "#e8d4a0", 17: "#e8d4a0", 18: "#3b82f6",
   19: "#3b82f6", 20: "#3b82f6", 21: "#3b82f6", 22: "#3b82f6", 23: "#FFFFFF", 24: "#3b82f6",
-  25: "#e8d4a0", 26: "#3b82f6",
+  25: "#FFFFFF", 26: "#3b82f6",
 
   // VERDE (27-40): 2 verdes + 1 blanca (30) + verdes
   27: "#e8d4a0", 28: "#22c55e", 29: "#22c55e", 30: "#FFFFFF", 31: "#22c55e", 32: "#22c55e",
   33: "#22c55e", 34: "#22c55e", 35: "#22c55e", 36: "#e8d4a0", 37: "#e8d4a0", 38: "#e8d4a0",
   39: "#22c55e", 40: "#e8d4a0",
 
-  // AMARILLO (41-54): 4 amarillas + 1 blanca (45) + amarillas
+  // AMARILLO (41-54): 3 amarillas + 1 blanca (45) + amarillas
   41: "#e8d4a0", 42: "#fbbf24", 43: "#fbbf24", 44: "#fbbf24", 45: "#FFFFFF", 46: "#fbbf24",
   47: "#fbbf24", 48: "#fbbf24", 49: "#fbbf24", 50: "#e8d4a0", 51: "#e8d4a0", 52: "#e8d4a0",
   53: "#fbbf24", 54: "#e8d4a0",
@@ -78,8 +77,8 @@ const BOARD_COLORS: Record<number, string> = {
 const FINAL_PATHS: Record<ColorKey, number[]> = {
   red: [100, 101, 102, 103, 104, 105, 106, 107],
   blue: [110, 111, 112, 113, 114, 115, 116, 117],
-  green: [120, 121, 122, 123, 124, 125, 126, 127],
-  yellow: [130, 131, 132, 133, 134, 135, 136, 137],
+  green: [130, 131, 132, 133, 134, 135, 136, 137],  // Verde va al centro
+  yellow: [120, 121, 122, 123, 124, 125, 126, 127],  // Amarillo va a la izquierda
 };
 
 const FINAL_MAP: Record<number, [number, number]> = {
@@ -101,10 +100,10 @@ const START_POS: Record<ColorKey, number> = {
 };
 
 const FINAL_ENTRY: Record<ColorKey, number> = {
-  red: 68, blue: 26, green: 40, yellow: 54
+  red: 68, blue: 26, green: 54, yellow: 40
 };
 
-const SAFE_CELLS = new Set([8, 23, 30, 45, 63]);
+const SAFE_CELLS = new Set([5, 12, 22, 23, 25, 30, 39, 45, 53, 63]);
 
 const nextPlayer = (p: ColorKey): ColorKey =>
   p === "red" ? "green" : p === "green" ? "yellow" : p === "yellow" ? "blue" : "red";
