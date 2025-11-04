@@ -40,32 +40,37 @@ export default function ParquesColombia() {
   const [dice1, setDice1] = useState<number>(0);
   const [dice2, setDice2] = useState<number>(0);
   const [usedDice, setUsedDice] = useState<[boolean, boolean]>([false, false]);
+  const [diceRolled, setDiceRolled] = useState(false);
   const [hint, setHint] = useState("Lanza los dados para comenzar");
 
   const currentPlayer = players.find(p => p.color === turn)!;
 
   function handleDice1Roll(value: number) {
-    if (dice1 > 0) return;
-    
-    const d2 = Math.floor(Math.random() * 6) + 1;
+    if (diceRolled) return;
     setDice1(value);
-    setDice2(d2);
+  }
+
+  function handleDice2Roll(value: number) {
+    if (diceRolled) return;
+    setDice2(value);
+    
+    // Cuando el segundo dado termine de girar, evaluamos
+    setDiceRolled(true);
     setUsedDice([false, false]);
     
-    if (value === d2) {
-      setHint(`¡Pares! ${value} y ${d2}. Mueve y tira de nuevo.`);
+    if (dice1 === value) {
+      setHint(`¡Pares! ${dice1} y ${value}. Mueve y tira de nuevo.`);
     } else {
-      setHint(`Dados: ${value} y ${d2}. Mueve tus fichas.`);
+      setHint(`Dados: ${dice1} y ${value}. Mueve tus fichas.`);
     }
   }
 
   function handleTokenClick(tokenIdx: number) {
-    if (dice1 === 0) {
-      setHint("Primero lanza los dados");
+    if (!diceRolled) {
+      setHint("Primero lanza ambos dados");
       return;
     }
 
-    // Lógica simplificada de movimiento
     const token = currentPlayer.tokens[tokenIdx];
     const diceToUse = !usedDice[0] ? dice1 : dice2;
     
@@ -99,75 +104,78 @@ export default function ParquesColombia() {
     else if (!newUsed[1]) newUsed[1] = true;
     setUsedDice(newUsed);
 
-    // Si ambos dados están usados
     if (newUsed[0] && newUsed[1]) {
-      // Si sacó pares, sigue jugando
       if (dice1 === dice2) {
-        setDice1(0);
-        setDice2(0);
-        setUsedDice([false, false]);
+        resetDice();
         setHint("¡Pares! Lanza de nuevo");
       } else {
-        // Cambiar turno
         setTimeout(() => {
           const next = nextPlayer(turn);
           setTurn(next);
-          setDice1(0);
-          setDice2(0);
-          setUsedDice([false, false]);
+          resetDice();
           setHint(`Turno de ${COLORS[next].label}`);
         }, 500);
       }
     }
   }
 
+  function resetDice() {
+    setDice1(0);
+    setDice2(0);
+    setUsedDice([false, false]);
+    setDiceRolled(false);
+  }
+
   return (
     <div className="w-full">
       {/* Header con turno */}
-      <div className="text-center mb-3">
+      <div className="text-center mb-4">
         <div 
-          className="inline-block px-5 py-2 rounded-full border-2 backdrop-blur-sm mb-2"
+          className="inline-block px-6 py-2.5 rounded-full border-2 backdrop-blur-sm mb-2"
           style={{ 
             borderColor: COLORS[turn].hex,
-            backgroundColor: `${COLORS[turn].hex}15`
+            backgroundColor: `${COLORS[turn].hex}20`
           }}
         >
-          <span className="text-base font-bold" style={{ color: COLORS[turn].hex }}>
+          <span className="text-lg font-bold" style={{ color: COLORS[turn].hex }}>
             Turno: {COLORS[turn].label}
           </span>
         </div>
-        <p className="text-xs text-gray-400">{hint}</p>
-        {(dice1 > 0 || dice2 > 0) && (
-          <p className="text-xs text-gray-500 mt-1">
+        <p className="text-sm text-gray-300 dark:text-gray-400">{hint}</p>
+        {diceRolled && (
+          <p className="text-xs text-gray-400 mt-1">
             Dados: {dice1} {usedDice[0] ? "✓" : "○"} | {dice2} {usedDice[1] ? "✓" : "○"}
           </p>
         )}
       </div>
 
-      {/* Layout principal */}
-      <div className="flex flex-col lg:flex-row items-start justify-center gap-4">
+      {/* Layout principal - MÁS GRANDE */}
+      <div className="flex flex-col lg:flex-row items-start justify-center gap-6">
         
-        {/* Tablero */}
-        <BoardSVG 
-          players={players}
-          turn={turn}
-          onTokenClick={handleTokenClick}
-        />
+        {/* Tablero - Más grande */}
+        <div className="flex-shrink-0">
+          <BoardSVG 
+            players={players}
+            turn={turn}
+            onTokenClick={handleTokenClick}
+          />
+        </div>
 
-        {/* Dados */}
-        <div className="flex lg:flex-col gap-3">
+        {/* Dados - Ambos con Dice3D */}
+        <div className="flex flex-row lg:flex-col gap-4">
           <DiceContainer 
             value={dice1}
             used={usedDice[0]}
             onRoll={handleDice1Roll}
             label="Dado 1"
+            disabled={diceRolled}
           />
           <DiceContainer 
             value={dice2}
             used={usedDice[1]}
-            onRoll={() => {}}
+            onRoll={handleDice2Roll}
             label="Dado 2"
-            disabled
+            disabled={diceRolled || dice1 === 0}
           />
         </div>
       </div>
@@ -175,7 +183,7 @@ export default function ParquesColombia() {
   );
 }
 
-/* ================== Componente Dado ================== */
+/* ================== Componente Dado - MEJORADO ================== */
 
 function DiceContainer({ 
   value, 
@@ -192,23 +200,26 @@ function DiceContainer({
 }) {
   return (
     <div className="flex flex-col items-center gap-2">
-      <p className="text-xs text-gray-400 font-medium">{label}</p>
+      <p className="text-xs text-gray-300 dark:text-gray-400 font-medium">{label}</p>
       <div 
-        className={`relative w-20 h-20 rounded-xl shadow-xl border-2 border-gray-700 bg-zinc-900/90 backdrop-blur flex items-center justify-center transition-opacity ${
+        className={`relative w-24 h-24 rounded-xl shadow-xl border-2 border-gray-700 dark:border-gray-600 bg-gray-900/80 backdrop-blur flex items-center justify-center transition-all ${
           used ? 'opacity-40' : ''
-        }`}
+        } ${disabled && value === 0 ? 'opacity-50' : ''}`}
       >
-        {value === 0 && !disabled ? (
-          <div style={{ ["--dice-size" as any]: "72px" }}>
-            <Dice3D onRoll={onRoll} size={72} />
+        {value === 0 ? (
+          <div style={{ ["--dice-size" as any]: "88px" }}>
+            <Dice3D onRoll={onRoll} size={88} disabled={disabled} />
           </div>
-        ) : value > 0 ? (
-          <DiceFace value={value} />
         ) : (
-          <div className="text-2xl text-gray-600">?</div>
+          <DiceFace value={value} />
         )}
       </div>
-      {!disabled && value === 0 && <p className="text-xs text-gray-500">Click aquí</p>}
+      {!disabled && value === 0 && (
+        <p className="text-xs text-gray-400">Click aquí</p>
+      )}
+      {disabled && value === 0 && dice1 === 0 && (
+        <p className="text-xs text-gray-500">Esperando...</p>
+      )}
     </div>
   );
 }
@@ -224,15 +235,15 @@ function DiceFace({ value }: { value: number }) {
   };
 
   return (
-    <svg viewBox="0 0 100 100" className="w-12 h-12">
+    <svg viewBox="0 0 100 100" className="w-16 h-16">
       {dots[value]?.map(([x, y], i) => (
-        <circle key={i} cx={x} cy={y} r="7" fill="#ffffff" />
+        <circle key={i} cx={x} cy={y} r="8" fill="#ffffff" />
       ))}
     </svg>
   );
 }
 
-/* ================== Tablero SVG ================== */
+/* ================== Tablero SVG - MÁS GRANDE ================== */
 
 function BoardSVG({
   players,
@@ -243,10 +254,9 @@ function BoardSVG({
   turn: ColorKey;
   onTokenClick: (idx: number) => void;
 }) {
-  const size = 560;
+  const size = 680; // Aumentado de 560 a 680
   const cell = size / 15;
 
-  // Posiciones de fichas en patios (cárceles)
   const jailPositions: Record<ColorKey, [number, number][]> = {
     red: [
       [cell * 10.8, cell * 1.2], [cell * 12.2, cell * 1.2],
@@ -271,7 +281,6 @@ function BoardSVG({
       return jailPositions[color][idx];
     }
     
-    // Posiciones del tablero circular simplificado
     const angle = (pos / 68) * Math.PI * 2 - Math.PI / 2;
     const radius = cell * 4;
     const x = cell * 7.5 + Math.cos(angle) * radius;
@@ -292,64 +301,70 @@ function BoardSVG({
   return (
     <svg 
       viewBox={`0 0 ${size} ${size}`} 
-      className="w-full max-w-[500px] drop-shadow-2xl rounded-2xl"
+      className="w-full max-w-[680px] drop-shadow-2xl rounded-2xl"
       style={{ background: '#fce4ec' }}
     >
-      {/* Patios/Cárceles en las 4 esquinas */}
+      {/* Patios/Cárceles */}
       <rect x={cell * 9.5} y={cell * 0.5} width={cell * 4} height={cell * 4} 
-            fill={COLORS.red.hex} stroke="#000" strokeWidth="2" rx="12" />
+            fill={COLORS.red.hex} stroke="#000" strokeWidth="3" rx="16" />
       <rect x={cell * 0.5} y={cell * 0.5} width={cell * 4} height={cell * 4} 
-            fill={COLORS.blue.hex} stroke="#000" strokeWidth="2" rx="12" />
+            fill={COLORS.blue.hex} stroke="#000" strokeWidth="3" rx="16" />
       <rect x={cell * 0.5} y={cell * 9.5} width={cell * 4} height={cell * 4} 
-            fill={COLORS.green.hex} stroke="#000" strokeWidth="2" rx="12" />
+            fill={COLORS.green.hex} stroke="#000" strokeWidth="3" rx="16" />
       <rect x={cell * 9.5} y={cell * 9.5} width={cell * 4} height={cell * 4} 
-            fill={COLORS.yellow.hex} stroke="#000" strokeWidth="2" rx="12" />
+            fill={COLORS.yellow.hex} stroke="#000" strokeWidth="3" rx="16" />
 
-      {/* Caminos (simplificados) */}
+      {/* Caminos */}
       <rect x={cell * 4.5} y={0} width={cell * 3} height={cell * 5} 
-            fill="#87ceeb" stroke="#000" strokeWidth="1.5" />
+            fill="#87ceeb" stroke="#000" strokeWidth="2" />
       <rect x={cell * 7.5} y={0} width={cell * 2} height={cell * 5} 
-            fill="#ffb6c1" stroke="#000" strokeWidth="1.5" />
+            fill="#ffb6c1" stroke="#000" strokeWidth="2" />
       
       <rect x={0} y={cell * 4.5} width={cell * 5} height={cell * 3} 
-            fill="#90ee90" stroke="#000" strokeWidth="1.5" />
+            fill="#90ee90" stroke="#000" strokeWidth="2" />
       <rect x={0} y={cell * 7.5} width={cell * 5} height={cell * 2} 
-            fill="#87ceeb" stroke="#000" strokeWidth="1.5" />
+            fill="#87ceeb" stroke="#000" strokeWidth="2" />
       
       <rect x={cell * 9.5} y={cell * 4.5} width={cell * 5} height={cell * 3} 
-            fill="#ffeb99" stroke="#000" strokeWidth="1.5" />
+            fill="#ffeb99" stroke="#000" strokeWidth="2" />
       <rect x={cell * 9.5} y={cell * 7.5} width={cell * 5} height={cell * 2} 
-            fill="#ffb6c1" stroke="#000" strokeWidth="1.5" />
+            fill="#ffb6c1" stroke="#000" strokeWidth="2" />
       
       <rect x={cell * 4.5} y={cell * 9.5} width={cell * 3} height={cell * 5} 
-            fill="#90ee90" stroke="#000" strokeWidth="1.5" />
+            fill="#90ee90" stroke="#000" strokeWidth="2" />
       <rect x={cell * 7.5} y={cell * 9.5} width={cell * 2} height={cell * 5} 
-            fill="#ffeb99" stroke="#000" strokeWidth="1.5" />
+            fill="#ffeb99" stroke="#000" strokeWidth="2" />
 
       {/* Centro (Llegada) */}
-      <circle cx={cell * 7.5} cy={cell * 7.5} r={cell * 2.2} 
+      <circle cx={cell * 7.5} cy={cell * 7.5} r={cell * 2.3} 
               fill="#fff" stroke="#000" strokeWidth="3" />
       
-      {/* Triángulos de llegada */}
-      <path d={`M ${cell * 7.5} ${cell * 5.3} L ${cell * 6} ${cell * 7.5} L ${cell * 9} ${cell * 7.5} Z`}
+      {/* Triángulos */}
+      <path d={`M ${cell * 7.5} ${cell * 5.2} L ${cell * 5.8} ${cell * 7.5} L ${cell * 9.2} ${cell * 7.5} Z`}
             fill={COLORS.blue.hex} stroke="#000" strokeWidth="2" />
-      <path d={`M ${cell * 9.7} ${cell * 7.5} L ${cell * 7.5} ${cell * 6} L ${cell * 7.5} ${cell * 9} Z`}
+      <path d={`M ${cell * 9.8} ${cell * 7.5} L ${cell * 7.5} ${cell * 5.8} L ${cell * 7.5} ${cell * 9.2} Z`}
             fill={COLORS.red.hex} stroke="#000" strokeWidth="2" />
-      <path d={`M ${cell * 7.5} ${cell * 9.7} L ${cell * 6} ${cell * 7.5} L ${cell * 9} ${cell * 7.5} Z`}
+      <path d={`M ${cell * 7.5} ${cell * 9.8} L ${cell * 5.8} ${cell * 7.5} L ${cell * 9.2} ${cell * 7.5} Z`}
             fill={COLORS.yellow.hex} stroke="#000" strokeWidth="2" />
-      <path d={`M ${cell * 5.3} ${cell * 7.5} L ${cell * 7.5} ${cell * 6} L ${cell * 7.5} ${cell * 9} Z`}
+      <path d={`M ${cell * 5.2} ${cell * 7.5} L ${cell * 7.5} ${cell * 5.8} L ${cell * 7.5} ${cell * 9.2} Z`}
             fill={COLORS.green.hex} stroke="#000" strokeWidth="2" />
 
-      <circle cx={cell * 7.5} cy={cell * 7.5} r={cell * 0.6} 
+      <circle cx={cell * 7.5} cy={cell * 7.5} r={cell * 0.65} 
               fill="#ffd700" stroke="#000" strokeWidth="2" />
+
+      {/* Textos "Salida" */}
+      <text x={cell * 2.5} y={cell * 2.5} fontSize="16" fontWeight="bold" fill="#fff" textAnchor="middle">Salida</text>
+      <text x={cell * 12} y={cell * 2.5} fontSize="16" fontWeight="bold" fill="#fff" textAnchor="middle">Salida</text>
+      <text x={cell * 2.5} y={cell * 12} fontSize="16" fontWeight="bold" fill="#fff" textAnchor="middle">Salida</text>
+      <text x={cell * 12} y={cell * 12} fontSize="16" fontWeight="bold" fill="#fff" textAnchor="middle">Salida</text>
 
       {/* Grid */}
       {Array.from({ length: 15 }).map((_, i) => (
         <g key={`grid-${i}`}>
           <line x1={i * cell} y1={0} x2={i * cell} y2={size} 
-                stroke="#000" strokeWidth="0.5" opacity="0.2" />
+                stroke="#000" strokeWidth="0.8" opacity="0.25" />
           <line x1={0} y1={i * cell} x2={size} y2={i * cell} 
-                stroke="#000" strokeWidth="0.5" opacity="0.2" />
+                stroke="#000" strokeWidth="0.8" opacity="0.25" />
         </g>
       ))}
 
@@ -368,7 +383,7 @@ function BoardSVG({
               <circle
                 cx={x}
                 cy={y}
-                r={cell * 0.5}
+                r={cell * 0.55}
                 fill={COLORS[t.color].hex}
                 opacity="0.3"
               >
@@ -383,17 +398,17 @@ function BoardSVG({
             <circle
               cx={x}
               cy={y}
-              r={cell * 0.35}
+              r={cell * 0.38}
               fill={COLORS[t.color].hex}
               stroke="#000"
-              strokeWidth="2"
-              filter="drop-shadow(0 2px 4px rgba(0,0,0,0.4))"
+              strokeWidth="2.5"
+              filter="drop-shadow(0 3px 6px rgba(0,0,0,0.4))"
             />
             <circle
-              cx={x - cell * 0.12}
-              cy={y - cell * 0.12}
-              r={cell * 0.12}
-              fill="rgba(255,255,255,0.6)"
+              cx={x - cell * 0.13}
+              cy={y - cell * 0.13}
+              r={cell * 0.13}
+              fill="rgba(255,255,255,0.65)"
             />
           </g>
         );
