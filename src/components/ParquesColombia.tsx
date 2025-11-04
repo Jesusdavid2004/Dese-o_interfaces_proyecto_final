@@ -2,9 +2,6 @@
 
 import { useState } from "react";
 import Dice3D from "@/components/Dice3D";
-/* eslint-disable @typescript-eslint/no-explicit-any */
-
-/* ================== Tipos / Constantes ================== */
 
 type ColorKey = "red" | "blue" | "green" | "yellow";
 type Token = { pos: number; id: string };
@@ -25,23 +22,22 @@ const COLORS: Record<ColorKey, { hex: string; label: string }> = {
   yellow: { hex: "#fbbf24", label: "AMARILLO" },
 };
 
-// MAPA DE POSICIONES
 const BOARD_MAP: Record<number, [number, number]> = {
-  // VERDE (27-40): vertical izquierda arriba
+  // VERDE (27-40)
   27: [6, 13], 28: [6, 12], 29: [6, 11], 30: [6, 10], 31: [6, 9], 32: [6, 8],
   33: [5, 8], 34: [4, 8], 35: [3, 8], 36: [2, 8], 37: [1, 8], 38: [0, 8],
   39: [0, 7], 40: [0, 6],
   
-  // AMARILLO (41-54): horizontal abajo izquierda - TODO AMARILLO
+  // AMARILLO (41-54)
   41: [1, 6], 42: [2, 6], 43: [3, 6], 44: [4, 6], 45: [5, 6], 46: [6, 6],
   47: [6, 5], 48: [6, 4], 49: [6, 3], 50: [6, 2], 51: [6, 1], 52: [6, 0],
   53: [7, 0], 54: [8, 0],
   
-  // ROJO (5-12): horizontal arriba derecha
+  // ROJO (5-12)
   5: [9, 6], 6: [10, 6], 7: [11, 6], 8: [12, 6], 9: [13, 6], 10: [14, 6],
   11: [14, 7], 12: [14, 8],
   
-  // AZUL (13-26): vertical derecha abajo
+  // AZUL (13-26)
   13: [13, 8], 14: [12, 8], 15: [11, 8], 16: [10, 8], 17: [9, 8], 18: [8, 8],
   19: [8, 9], 20: [8, 10], 21: [8, 11], 22: [8, 12], 23: [8, 13], 24: [8, 14],
   25: [7, 14], 26: [6, 14],
@@ -52,26 +48,25 @@ const BOARD_MAP: Record<number, [number, number]> = {
   67: [14, 7], 68: [14, 8],
 };
 
-// COLORES EXACTOS DE LAS IMÁGENES
 const BOARD_COLORS: Record<number, string> = {
-  // VERDE (27-40): 3 verdes + 1 blanca + verdes
-  27: "#e8d4a0", 28: "#e8d4a0", 29: "#22c55e", 30: "#22c55e", 31: "#22c55e", 32: "#22c55e",
+  // VERDE: 2 verdes + 1 blanca + 1 verde
+  27: "#e8d4a0", 28: "#22c55e", 29: "#22c55e", 30: "#FFFFFF", 31: "#22c55e", 32: "#22c55e",
   33: "#22c55e", 34: "#22c55e", 35: "#22c55e", 36: "#e8d4a0", 37: "#e8d4a0", 38: "#e8d4a0",
   39: "#22c55e", 40: "#e8d4a0",
 
-  // AMARILLO (41-54): TODO AMARILLO - NO BLANCAS
+  // AMARILLO: TODO AMARILLO
   41: "#fbbf24", 42: "#fbbf24", 43: "#fbbf24", 44: "#fbbf24", 45: "#fbbf24", 46: "#fbbf24",
   47: "#fbbf24", 48: "#fbbf24", 49: "#fbbf24", 50: "#fbbf24", 51: "#fbbf24", 52: "#fbbf24",
   53: "#fbbf24", 54: "#fbbf24",
 
-  // ROJO (5-12): 4 rojas + 1 blanca arriba
-  5: "#ef4444", 6: "#ef4444", 7: "#ef4444", 8: "#ef4444", 9: "#e8d4a0", 10: "#e8d4a0",
-  11: "#e8d4a0", 12: "#FFFFFF",
+  // ROJO: 1 rojo + 1 blanca + rojos
+  5: "#ef4444", 6: "#ef4444", 7: "#ef4444", 8: "#FFFFFF", 9: "#e8d4a0", 10: "#e8d4a0",
+  11: "#e8d4a0", 12: "#ef4444",
 
-  // AZUL (13-26): azul + blanca arriba vertical
+  // AZUL: azul + 1 blanca + azul
   13: "#e8d4a0", 14: "#e8d4a0", 15: "#e8d4a0", 16: "#e8d4a0", 17: "#e8d4a0", 18: "#3b82f6",
-  19: "#3b82f6", 20: "#3b82f6", 21: "#3b82f6", 22: "#3b82f6", 23: "#3b82f6", 24: "#3b82f6",
-  25: "#FFFFFF", 26: "#3b82f6",
+  19: "#3b82f6", 20: "#3b82f6", 21: "#3b82f6", 22: "#3b82f6", 23: "#FFFFFF", 24: "#3b82f6",
+  25: "#3b82f6", 26: "#3b82f6",
 
   // Conectar (55-68)
   55: "#e8d4a0", 56: "#e8d4a0", 57: "#e8d4a0", 58: "#e8d4a0", 59: "#e8d4a0", 60: "#e8d4a0",
@@ -108,13 +103,10 @@ const FINAL_ENTRY: Record<ColorKey, number> = {
   red: 68, blue: 26, green: 40, yellow: 54
 };
 
-// 4 SEGUROS (blancas)
-const SAFE_CELLS = new Set([12, 25, 29, 63]);
+const SAFE_CELLS = new Set([8, 23, 30, 63]);
 
 const nextPlayer = (p: ColorKey): ColorKey =>
   p === "red" ? "green" : p === "green" ? "yellow" : p === "yellow" ? "blue" : "red";
-
-/* ================== Componente Principal ================== */
 
 export default function ParquesColombia() {
   const [gamePhase, setGamePhase] = useState<GamePhase>("order");
@@ -406,9 +398,7 @@ export default function ParquesColombia() {
       <div className="text-center mb-4">
         {gamePhase === "order" ? (
           <div className="inline-block px-6 py-3 rounded-full bg-gradient-to-r from-purple-500/20 to-pink-500/20 border-2 border-purple-500/50 backdrop-blur-sm">
-            <span className="text-lg font-bold text-purple-300">
-              🎲 Orden
-            </span>
+            <span className="text-lg font-bold text-purple-300">🎲 Orden</span>
           </div>
         ) : (
           <div 
@@ -493,8 +483,6 @@ export default function ParquesColombia() {
   );
 }
 
-/* ================== Dados ================== */
-
 function DiceContainer({ 
   value, 
   used,
@@ -550,8 +538,6 @@ function DiceFace({ value }: { value: number }) {
     </svg>
   );
 }
-
-/* ================== Tablero SVG ================== */
 
 function BoardSVG({
   players,
@@ -623,7 +609,6 @@ function BoardSVG({
       className="w-full max-w-[850px] drop-shadow-2xl rounded-2xl"
       style={{ background: '#d4a574' }}
     >
-      {/* Patios */}
       <rect x={0} y={0} width={cell * 4} height={cell * 4} 
             fill={COLORS.green.hex} stroke="#000" strokeWidth="4" rx="16" />
       <rect x={cell * 11} y={0} width={cell * 4} height={cell * 4} 
@@ -633,7 +618,6 @@ function BoardSVG({
       <rect x={cell * 11} y={cell * 11} width={cell * 4} height={cell * 4} 
             fill={COLORS.blue.hex} stroke="#000" strokeWidth="4" rx="16" />
 
-      {/* Casillas (1-68) */}
       {Object.entries(BOARD_MAP).map(([pos, [x, y]]) => {
         const cellPos = parseInt(pos);
         const fill = BOARD_COLORS[cellPos] || "#e8d4a0";
@@ -652,7 +636,6 @@ function BoardSVG({
         );
       })}
 
-      {/* Rectas finales */}
       {Object.entries(FINAL_MAP).map(([pos, [x, y]]) => {
         const cellPos = parseInt(pos);
         let fill = "#fff";
@@ -676,7 +659,6 @@ function BoardSVG({
         );
       })}
 
-      {/* Centro */}
       <g>
         <circle cx={cell * 7.5} cy={cell * 7.5} r={cell * 1.3} 
                 fill="#ffd700" stroke="#000" strokeWidth="4" />
@@ -704,13 +686,11 @@ function BoardSVG({
               fill="#000" textAnchor="middle">🏆</text>
       </g>
 
-      {/* Textos */}
       <text x={cell * 2} y={cell * 2.5} fontSize="20" fontWeight="bold" fill="#fff" textAnchor="middle">SALIDA</text>
       <text x={cell * 12.5} y={cell * 2.5} fontSize="20" fontWeight="bold" fill="#fff" textAnchor="middle">SALIDA</text>
       <text x={cell * 2} y={cell * 12.7} fontSize="20" fontWeight="bold" fill="#fff" textAnchor="middle">SALIDA</text>
       <text x={cell * 12.5} y={cell * 12.7} fontSize="20" fontWeight="bold" fill="#fff" textAnchor="middle">SALIDA</text>
 
-      {/* Fichas */}
       {allTokens.map((t) => {
         const isMine = t.color === currentColor && gamePhase === "playing";
         const [x, y] = getTokenXY(t.color, t.pos, t.tokenIdx);
