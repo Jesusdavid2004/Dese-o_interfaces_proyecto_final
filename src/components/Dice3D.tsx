@@ -12,16 +12,14 @@ type Props = {
   size?: number;
 };
 
-/* eslint-disable @typescript-eslint/no-explicit-any */
-
 /** Rotaciones para dejar cada cara al frente (sistema de ejes coherente) */
 const FACE_TRANSFORM: Record<number, string> = {
-  1: "rotateX(0deg) rotateY(0deg) rotateZ(0deg)",     // front
-  2: "rotateX(-90deg) rotateY(0deg) rotateZ(0deg)",    // top
-  3: "rotateX(0deg) rotateY(90deg) rotateZ(0deg)",     // right
-  4: "rotateX(0deg) rotateY(-90deg) rotateZ(0deg)",    // left
-  5: "rotateX(90deg) rotateY(0deg) rotateZ(0deg)",     // bottom
-  6: "rotateX(180deg) rotateY(0deg) rotateZ(0deg)",    // back
+  1: "rotateX(0deg) rotateY(0deg) rotateZ(0deg)", // front
+  2: "rotateX(-90deg) rotateY(0deg) rotateZ(0deg)", // top
+  3: "rotateX(0deg) rotateY(90deg) rotateZ(0deg)", // right
+  4: "rotateX(0deg) rotateY(-90deg) rotateZ(0deg)", // left
+  5: "rotateX(90deg) rotateY(0deg) rotateZ(0deg)", // bottom
+  6: "rotateX(180deg) rotateY(0deg) rotateZ(0deg)", // back
 };
 
 /** Baraja in-place con Fisher–Yates */
@@ -62,6 +60,7 @@ export default function Dice3D({
       if (t2.current) clearTimeout(t2.current);
       if (t3.current) clearTimeout(t3.current);
     };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   /** Genera un nuevo ciclo: [1..5] aleatorio + 6 al final */
@@ -82,10 +81,7 @@ export default function Dice3D({
     return next;
   }
 
-  const transform = useMemo(
-    () => FACE_TRANSFORM[face] ?? FACE_TRANSFORM[1],
-    [face]
-  );
+  const transform = useMemo(() => FACE_TRANSFORM[face] ?? FACE_TRANSFORM[1], [face]);
 
   const roll = () => {
     if (disabled || phaseClass.includes("spinning")) return;
@@ -116,14 +112,17 @@ export default function Dice3D({
     }, spinDuration);
   };
 
-  // Evita saltos de hidratación
+  // Preparar style con variable CSS custom sin usar "any"
+  const cssVar = { ["--dice-size"]: `${size}px` } as React.CSSProperties;
+
+  // Evita saltos de hidratación: mostrar cubo estático mientras no está montado
   if (!mounted) {
     return (
       <button
         onClick={roll}
         aria-label="Lanzar dado"
         className={`dice-3d ${disabled ? "opacity-60 cursor-not-allowed" : ""}`}
-        style={{ ["--dice-size" as any]: `${size}px` }}
+        style={cssVar}
         disabled={disabled}
       >
         <div className="dice-anim-wrap">
@@ -140,7 +139,7 @@ export default function Dice3D({
       onClick={roll}
       aria-label="Lanzar dado"
       className={`dice-3d ${disabled ? "opacity-60 cursor-not-allowed" : ""}`}
-      style={{ ["--dice-size" as any]: `${size}px` }}
+      style={cssVar}
       disabled={disabled}
     >
       {/* El wrapper anima. El cubo solo mantiene la rotación final de la cara */}

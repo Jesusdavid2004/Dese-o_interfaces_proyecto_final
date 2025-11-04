@@ -1,421 +1,403 @@
 "use client";
 
-import { useMemo, useState } from "react";
+import { useState } from "react";
 import Dice3D from "@/components/Dice3D";
 /* eslint-disable @typescript-eslint/no-explicit-any */
-
-
 
 /* ================== Tipos / Constantes ================== */
 
 type ColorKey = "red" | "blue" | "green" | "yellow";
-type Token = { pos: number }; // -1 patio; 0..51 anillo; 100..105 recta; 999 llegada
+type Token = { pos: number };
 type Player = { color: ColorKey; tokens: Token[] };
 
 const COLORS: Record<ColorKey, { hex: string; label: string }> = {
-  red:    { hex: "#e53935", label: "ROJO" },
-  blue:   { hex: "#1e88e5", label: "AZUL" },
-  green:  { hex: "#43a047", label: "VERDE" },
-  yellow: { hex: "#f6c946", label: "AMARILLO" },
+  red:    { hex: "#ef4444", label: "ROJO" },
+  blue:   { hex: "#3b82f6", label: "AZUL" },
+  green:  { hex: "#22c55e", label: "VERDE" },
+  yellow: { hex: "#fbbf24", label: "AMARILLO" },
 };
 
-const START_INDEX: Record<ColorKey, number> = {
-  red: 0, blue: 13, green: 26, yellow: 39,
-};
-const ENTRY_INDEX: Record<ColorKey, number> = {
-  red: 50, blue: 11, green: 24, yellow: 37,
-};
-const FINAL_BASE: Record<ColorKey, number> = {
-  red: 100, blue: 110, green: 120, yellow: 130,
+const START_POS: Record<ColorKey, number> = {
+  red: 5, green: 22, yellow: 39, blue: 56
 };
 
-// “Seguros” estándar
-const SAFE_SET = new Set<number>([0, 8, 13, 21, 26, 34, 39, 47]);
+const SAFE_CELLS = new Set([5, 12, 22, 29, 39, 46, 56, 63]);
 
-/* Utilidad */
-const isFinal = (p: number) => p >= 100 && p < 140;
-const adv = (p: number, s: number) => (p + s) % 52;
 const nextPlayer = (p: ColorKey): ColorKey =>
-  p === "red" ? "blue" : p === "blue" ? "green" : p === "green" ? "yellow" : "red";
+  p === "red" ? "green" : p === "green" ? "yellow" : p === "yellow" ? "blue" : "red";
 
-/* ================== Componente Raíz ================== */
+/* ================== Componente Principal ================== */
 
 export default function ParquesColombia() {
   const [players, setPlayers] = useState<Player[]>([
-    { color: "red", tokens: [{ pos: -1 }, { pos: -1 }] },
-    { color: "blue", tokens: [{ pos: -1 }, { pos: -1 }] },
-    { color: "green", tokens: [{ pos: -1 }, { pos: -1 }] },
-    { color: "yellow", tokens: [{ pos: -1 }, { pos: -1 }] },
+    { color: "red", tokens: [{ pos: -1 }, { pos: -1 }, { pos: -1 }, { pos: -1 }] },
+    { color: "green", tokens: [{ pos: -1 }, { pos: -1 }, { pos: -1 }, { pos: -1 }] },
+    { color: "yellow", tokens: [{ pos: -1 }, { pos: -1 }, { pos: -1 }, { pos: -1 }] },
+    { color: "blue", tokens: [{ pos: -1 }, { pos: -1 }, { pos: -1 }, { pos: -1 }] },
   ]);
+  
   const [turn, setTurn] = useState<ColorKey>("red");
-  const [roll, setRoll] = useState<number | null>(null);
-  const [hint, setHint] = useState("Tira el dado para comenzar");
+  const [dice1, setDice1] = useState<number>(0);
+  const [dice2, setDice2] = useState<number>(0);
+  const [usedDice, setUsedDice] = useState<[boolean, boolean]>([false, false]);
+  const [hint, setHint] = useState("Lanza los dados para comenzar");
 
-  const current = useMemo(() => players.find((p) => p.color === turn)!, [players, turn]);
+  const currentPlayer = players.find(p => p.color === turn)!;
 
-  function handleRoll(n: number) {
-    setRoll(n);
-    setHint(`Obtuviste ${n}. Elige una ficha ${COLORS[turn].label}.`);
-  }
-
-  function commit(state: Player[], extra: boolean) {
-    setPlayers(state); // << guarda el nuevo estado
-    setRoll(null);
-    if (extra) {
-      setHint("Sacaste 6: tiras de nuevo.");
+  function handleDice1Roll(value: number) {
+    if (dice1 > 0) return;
+    
+    const d2 = Math.floor(Math.random() * 6) + 1;
+    setDice1(value);
+    setDice2(d2);
+    setUsedDice([false, false]);
+    
+    if (value === d2) {
+      setHint(`¡Pares! ${value} y ${d2}. Mueve y tira de nuevo.`);
     } else {
-      const nxt = nextPlayer(turn);
-      setTurn(nxt);
-      setHint(`Turno de ${COLORS[nxt].label}`);
+      setHint(`Dados: ${value} y ${d2}. Mueve tus fichas.`);
     }
   }
 
-  function eatIfPossible(state: Player[], me: ColorKey, pos: number) {
-    if (SAFE_SET.has(pos)) return;
-    state.forEach((p) => {
-      if (p.color === me) return;
-      p.tokens.forEach((t) => { if (t.pos === pos) t.pos = -1; });
-    });
-  }
-
-  function moveToken(i: number) {
-    if (roll == null) return;
-    const n = roll;
-    const isSix = n === 6;
-
-    const next = players.map((p) => ({ ...p, tokens: p.tokens.map((t) => ({ ...t })) }));
-    const me   = next.find((p) => p.color === turn)!;
-    const tok  = me.tokens[i];
-
-    // Salida con 5
-    if (tok.pos === -1) {
-      if (n !== 5) { setHint("Para salir del patio necesitas un 5."); return; }
-      tok.pos = START_INDEX[turn];
-      eatIfPossible(next, turn, tok.pos);
-      commit(next, false);
+  function handleTokenClick(tokenIdx: number) {
+    if (dice1 === 0) {
+      setHint("Primero lanza los dados");
       return;
     }
 
-    // Anillo
-    if (!isFinal(tok.pos)) {
-      let steps = n;
-      let p = tok.pos;
-
-      while (steps > 0) {
-        p = adv(p, 1);
-        steps--;
-        if (p === ENTRY_INDEX[turn]) {
-          if (steps > 0) {
-            const base = FINAL_BASE[turn];
-            const toFinal = Math.min(steps, 6);
-            tok.pos = base + (toFinal - 1);
-            steps = 0;
-          } else {
-            tok.pos = p;
-          }
-        }
+    // Lógica simplificada de movimiento
+    const token = currentPlayer.tokens[tokenIdx];
+    const diceToUse = !usedDice[0] ? dice1 : dice2;
+    
+    // Salir de la cárcel con 5
+    if (token.pos === -1) {
+      if (dice1 !== 5 && dice2 !== 5 && dice1 + dice2 !== 5) {
+        setHint("Necesitas un 5 para salir");
+        return;
       }
-      if (!isFinal(tok.pos)) {
-        tok.pos = p;
-        eatIfPossible(next, turn, tok.pos);
-      }
-      commit(next, isSix);
+      moveToken(tokenIdx, START_POS[turn]);
+      markDiceUsed();
       return;
     }
 
-    // Recta final
-    const base   = FINAL_BASE[turn];
-    const offset = tok.pos - base; // 0..5
-    const target = offset + n;
+    // Movimiento normal
+    const newPos = (token.pos + diceToUse) % 68;
+    moveToken(tokenIdx, newPos);
+    markDiceUsed();
+  }
 
-    if (target < 6) {
-      tok.pos = base + target;
-      commit(next, isSix);
-    } else if (target === 6) {
-      tok.pos = 999;         // llegada
-      setHint("¡Llegada! 🎉");
-      commit(next, isSix);
-    } else {
-      setHint("No puedes exceder la llegada.");
-      commit(next, isSix);
+  function moveToken(tokenIdx: number, newPos: number) {
+    const newPlayers = [...players];
+    const playerIdx = newPlayers.findIndex(p => p.color === turn);
+    newPlayers[playerIdx].tokens[tokenIdx].pos = newPos;
+    setPlayers(newPlayers);
+  }
+
+  function markDiceUsed() {
+    const newUsed: [boolean, boolean] = [...usedDice];
+    if (!newUsed[0]) newUsed[0] = true;
+    else if (!newUsed[1]) newUsed[1] = true;
+    setUsedDice(newUsed);
+
+    // Si ambos dados están usados
+    if (newUsed[0] && newUsed[1]) {
+      // Si sacó pares, sigue jugando
+      if (dice1 === dice2) {
+        setDice1(0);
+        setDice2(0);
+        setUsedDice([false, false]);
+        setHint("¡Pares! Lanza de nuevo");
+      } else {
+        // Cambiar turno
+        setTimeout(() => {
+          const next = nextPlayer(turn);
+          setTurn(next);
+          setDice1(0);
+          setDice2(0);
+          setUsedDice([false, false]);
+          setHint(`Turno de ${COLORS[next].label}`);
+        }, 500);
+      }
     }
   }
 
   return (
     <div className="w-full">
-      {/* Turno */}
-      <div className="flex items-center justify-center mb-2">
-        <span
-          className="px-3 py-1 rounded-full text-sm font-semibold bg-zinc-900/90 text-white ring-1"
-          style={{ boxShadow: `0 0 0 2px ${COLORS[turn].hex}55` }}
+      {/* Header con turno */}
+      <div className="text-center mb-3">
+        <div 
+          className="inline-block px-5 py-2 rounded-full border-2 backdrop-blur-sm mb-2"
+          style={{ 
+            borderColor: COLORS[turn].hex,
+            backgroundColor: `${COLORS[turn].hex}15`
+          }}
         >
-          <span className="opacity-80 mr-1">Turno:</span>
-          <span style={{ color: COLORS[turn].hex }}>{COLORS[turn].label}</span>
-        </span>
+          <span className="text-base font-bold" style={{ color: COLORS[turn].hex }}>
+            Turno: {COLORS[turn].label}
+          </span>
+        </div>
+        <p className="text-xs text-gray-400">{hint}</p>
+        {(dice1 > 0 || dice2 > 0) && (
+          <p className="text-xs text-gray-500 mt-1">
+            Dados: {dice1} {usedDice[0] ? "✓" : "○"} | {dice2} {usedDice[1] ? "✓" : "○"}
+          </p>
+        )}
       </div>
-      <p className="text-center text-zinc-300 mb-3">{hint}</p>
 
-      {/* Layout compacto */}
-      <div className="grid grid-cols-1 md:grid-cols-[auto_120px] gap-6 items-center justify-items-center">
-        <BoardSVG
+      {/* Layout principal */}
+      <div className="flex flex-col lg:flex-row items-start justify-center gap-4">
+        
+        {/* Tablero */}
+        <BoardSVG 
           players={players}
           turn={turn}
-          onClickToken={(i) => moveToken(i)}
-          className="w-[300px] sm:w-[360px] lg:w-[420px]"
+          onTokenClick={handleTokenClick}
         />
-        <div className="flex flex-col items-center">
-          <div style={{ ["--dice-size" as any]: "96px" }}>
-            <Dice3D onRoll={handleRoll} />
-          </div>
-          <p className="text-xs text-zinc-400 mt-2">Haz clic para tirar</p>
+
+        {/* Dados */}
+        <div className="flex lg:flex-col gap-3">
+          <DiceContainer 
+            value={dice1}
+            used={usedDice[0]}
+            onRoll={handleDice1Roll}
+            label="Dado 1"
+          />
+          <DiceContainer 
+            value={dice2}
+            used={usedDice[1]}
+            onRoll={() => {}}
+            label="Dado 2"
+            disabled
+          />
         </div>
       </div>
     </div>
   );
 }
 
-/* ================== SVG Deluxe ================== */
+/* ================== Componente Dado ================== */
 
-function BoardSVG({
-  players, turn, onClickToken, className,
-}: {
-  players: Player[]; turn: ColorKey; onClickToken: (i: number) => void; className?: string;
+function DiceContainer({ 
+  value, 
+  used,
+  onRoll, 
+  label,
+  disabled = false
+}: { 
+  value: number; 
+  used: boolean;
+  onRoll: (v: number) => void; 
+  label: string;
+  disabled?: boolean;
 }) {
-  const S = 560;     // tamaño del viewBox
-  const N = 15;
-  const unit = S / N;
-  const C = (n: number) => n * unit;
-
-  const RED = "#E53935", BLUE = "#1E88E5", GREEN = "#43A047", YELLOW = "#F6C946";
-
-  // tokens: color + pos + índice de token dentro del jugador
-  const tokens = players.flatMap((p) => p.tokens.map((t, ti) => ({ color: p.color, pos: t.pos, idx: ti })));
-
-  // anillo 0..51 -> celda superior-izq
-  function ringXY(pos: number) {
-    const side = Math.floor(pos / 13), off = pos % 13;
-    if (side === 0) return { x: C(1 + off), y: C(5) };
-    if (side === 1) return { x: C(9), y: C(1 + off) };
-    if (side === 2) return { x: C(13 - off), y: C(9) };
-    return { x: C(5), y: C(13 - off) };
-  }
-
-  // coordenadas centro de ficha
-  function tokenXY(color: ColorKey, pos: number) {
-    if (pos === -1) {
-      if (color === "red")   return { x: C(2.5),  y: C(2.5)  };
-      if (color === "blue")  return { x: C(12.5), y: C(2.5)  };
-      if (color === "green") return { x: C(2.5),  y: C(12.5) };
-      return { x: C(12.5), y: C(12.5) };
-    }
-    if (pos === 999) return { x: C(7.5), y: C(7.5) };
-
-    if (pos >= 100 && pos < 140) {
-      const d = Math.min(pos % 10, 5);
-      if (color === "red")   return { x: C(7),     y: C(5 + d) };
-      if (color === "blue")  return { x: C(9 - d), y: C(7)     };
-      if (color === "green") return { x: C(7),     y: C(9 - d) };
-      return { x: C(5 + d), y: C(7) };
-    }
-    const r = ringXY(pos);
-    return { x: r.x + unit / 2, y: r.y + unit / 2 };
-  }
-
   return (
-    <div className={["aspect-square rounded-3xl shadow-[0_20px_60px_rgba(0,0,0,.5)]", className || ""].join(" ")}>
-      <svg viewBox={`0 0 ${S} ${S}`} width="100%" height="100%" preserveAspectRatio="xMidYMid meet">
-        <defs>
-          {/* Madera rica */}
-          <linearGradient id="wood1" x1="0" y1="0" x2="1" y2="1">
-            <stop offset="0%"   stopColor="#cda46b"/>
-            <stop offset="50%"  stopColor="#d9b277"/>
-            <stop offset="100%" stopColor="#b48649"/>
-          </linearGradient>
-          <linearGradient id="wood2" x1="0" y1="0" x2="1" y2="0">
-            <stop offset="0%"   stopColor="#e2bf85"/>
-            <stop offset="100%" stopColor="#c89b58"/>
-          </linearGradient>
-
-          {/* Fieltro profundo */}
-          <radialGradient id="felt" cx="35%" cy="30%" r="80%">
-            <stop offset="0%"  stopColor="#115c3a" />
-            <stop offset="60%" stopColor="#0d4a2f" />
-            <stop offset="100%" stopColor="#0a3a24" />
-          </radialGradient>
-          <radialGradient id="feltGlow" cx="35%" cy="30%" r="55%">
-            <stop offset="0%"   stopColor="rgba(255,255,255,.16)"/>
-            <stop offset="60%"  stopColor="rgba(255,255,255,.07)"/>
-            <stop offset="100%" stopColor="rgba(0,0,0,0)"/>
-          </radialGradient>
-
-          {/* Sombra de fichas */}
-          <filter id="tok" x="-40%" y="-40%" width="180%" height="180%">
-            <feDropShadow dx="0" dy="4" stdDeviation="4" floodOpacity="0.38"/>
-          </filter>
-        </defs>
-
-        {/* Marco madera doble */}
-        <rect x="0" y="0" width={S} height={S} rx={32} fill="url(#wood1)"/>
-        <rect x="10" y="10" width={S-20} height={S-20} rx={28} fill="url(#wood2)"/>
-        {/* Fondo fieltro */}
-        <rect x="18" y="18" width={S-36} height={S-36} rx={24} fill="url(#felt)"/>
-        <rect x="18" y="18" width={S-36} height={S-36} rx={24} fill="url(#feltGlow)"/>
-        <rect x="18" y="18" width={S-36} height={S-36} rx={24} fill="none" stroke="rgba(255,255,255,.18)" strokeWidth={2}/>
-
-        {/* Patios con brillo */}
-        <Patio x={C(0)}  y={C(0)}  size={C(5)} color={RED}/>
-        <Patio x={C(10)} y={C(0)}  size={C(5)} color={BLUE}/>
-        <Patio x={C(0)}  y={C(10)} size={C(5)} color={GREEN}/>
-        <Patio x={C(10)} y={C(10)} size={C(5)} color={YELLOW}/>
-
-        {/* Cuadrícula en cruz (camino) */}
-        {Array.from({ length: 13 }).map((_, r) =>
-          Array.from({ length: 13 }).map((_, c) => {
-            const i = c + 1, j = r + 1;
-            const inCross = (i >= 5 && i <= 9) || (j >= 5 && j <= 9);
-            const inCenter = i >= 5 && i <= 9 && j >= 5 && j <= 9;
-            if (!(inCross && !inCenter)) return null;
-            return (
-              <rect key={`g-${r}-${c}`} x={C(i)} y={C(j)} width={unit} height={unit}
-                fill="rgba(255,255,255,.055)" stroke="rgba(255,255,255,.23)" strokeWidth={0.6}/>
-            );
-          })
+    <div className="flex flex-col items-center gap-2">
+      <p className="text-xs text-gray-400 font-medium">{label}</p>
+      <div 
+        className={`relative w-20 h-20 rounded-xl shadow-xl border-2 border-gray-700 bg-zinc-900/90 backdrop-blur flex items-center justify-center transition-opacity ${
+          used ? 'opacity-40' : ''
+        }`}
+      >
+        {value === 0 && !disabled ? (
+          <div style={{ ["--dice-size" as any]: "72px" }}>
+            <Dice3D onRoll={onRoll} size={72} />
+          </div>
+        ) : value > 0 ? (
+          <DiceFace value={value} />
+        ) : (
+          <div className="text-2xl text-gray-600">?</div>
         )}
-
-        {/* Entradas curvas estilo colombiano */}
-        <EntryCurve C={C} side="left"   color={RED}/>
-        <EntryCurve C={C} side="top"    color={BLUE}/>
-        <EntryCurve C={C} side="bottom" color={GREEN}/>
-        <EntryCurve C={C} side="right"  color={YELLOW}/>
-
-        {/* Roseta central premium */}
-        <g transform={`translate(${C(5)}, ${C(5)})`}>
-          <circle cx={C(2.5)} cy={C(2.5)} r={C(2.45)} fill="rgba(0,0,0,.35)"/>
-          <circle cx={C(2.5)} cy={C(2.5)} r={C(2.34)} fill="#0c3823"/>
-          <circle cx={C(2.5)} cy={C(2.5)} r={C(2.3)} fill="#fff" opacity=".06"/>
-          <path d={`M ${C(2.5)} ${C(2.5)} L ${C(2.5)} 0 A ${C(2.5)} ${C(2.5)} 0 0 1 ${C(5)} ${C(2.5)} Z`} fill={RED}/>
-          <path d={`M ${C(2.5)} ${C(2.5)} L ${C(5)} ${C(2.5)} A ${C(2.5)} ${C(2.5)} 0 0 1 ${C(2.5)} ${C(5)} Z`} fill={BLUE}/>
-          <path d={`M ${C(2.5)} ${C(2.5)} L ${C(2.5)} ${C(5)} A ${C(2.5)} ${C(2.5)} 0 0 1 0 ${C(2.5)} Z`} fill={GREEN}/>
-          <path d={`M ${C(2.5)} ${C(2.5)} L 0 ${C(2.5)} A ${C(2.5)} ${C(2.5)} 0 0 1 ${C(2.5)} 0 Z`} fill={YELLOW}/>
-          <circle cx={C(2.5)} cy={C(2.5)} r={C(0.9)} fill="#fff" opacity=".9"/>
-        </g>
-
-        {/* Seguros */}
-        {[0,8,13,21,26,34,39,47].map((p) => {
-          const side = Math.floor(p / 13), off = p % 13;
-          let x=0, y=0;
-          if (side===0){x=C(1+off); y=C(5)}
-          else if (side===1){x=C(9); y=C(1+off)}
-          else if (side===2){x=C(13-off); y=C(9)}
-          else {x=C(5); y=C(13-off)}
-          return <circle key={`s-${p}`} cx={x + unit/2} cy={y + unit/2} r={6} fill="#fff" opacity=".55"/>;
-        })}
-
-        {/* Etiquetas */}
-        <Labels C={C} />
-
-        {/* Fichas con halo si es el turno */}
-        {tokens.map((t, idx) => {
-          const { x, y } = tokenXY(t.color as ColorKey, t.pos);
-          const hex = COLORS[t.color as ColorKey].hex;
-          const isMine = t.color === turn;
-          return (
-            <g key={`tok-${idx}`} filter="url(#tok)"
-               onClick={() => isMine && onClickToken(t.idx)}
-               style={{ cursor: isMine ? "pointer" : "default" }}>
-              {isMine && (
-                <circle cx={x} cy={y} r={18}
-                        fill={hex} opacity=".20">
-                  <animate attributeName="opacity" values="0.20;0.45;0.20" dur="1.8s" repeatCount="indefinite"/>
-                </circle>
-              )}
-              <circle cx={x} cy={y} r={14} fill={hex}/>
-              <circle cx={x-5} cy={y-6} r={6} fill="rgba(255,255,255,.70)"/>
-            </g>
-          );
-        })}
-      </svg>
+      </div>
+      {!disabled && value === 0 && <p className="text-xs text-gray-500">Click aquí</p>}
     </div>
   );
 }
 
-/* ============ Partes visuales reutilizables ============ */
+function DiceFace({ value }: { value: number }) {
+  const dots: Record<number, [number, number][]> = {
+    1: [[50, 50]],
+    2: [[30, 30], [70, 70]],
+    3: [[30, 30], [50, 50], [70, 70]],
+    4: [[30, 30], [70, 30], [30, 70], [70, 70]],
+    5: [[30, 30], [70, 30], [50, 50], [30, 70], [70, 70]],
+    6: [[30, 30], [70, 30], [30, 50], [70, 50], [30, 70], [70, 70]],
+  };
 
-function Patio({ x, y, size, color }: { x: number; y: number; size: number; color: string }) {
-  const id = `p-${color.replace("#","")}`;
   return (
-    <g>
-      <defs>
-        <linearGradient id={id} x1="0" y1="0" x2="1" y2="1">
-          <stop offset="0%" stopColor={shade(color, 0.10)}/>
-          <stop offset="100%" stopColor={shade(color, -0.08)}/>
-        </linearGradient>
-      </defs>
-      <rect x={x} y={y} width={size} height={size} rx={16} fill={`url(#${id})`} />
-      <rect x={x} y={y} width={size} height={size} rx={16} fill="none" stroke="rgba(0,0,0,.18)" strokeWidth={1}/>
-      <circle cx={x + size*0.26} cy={y + size*0.26} r={size*0.06} fill="rgba(255,255,255,.75)"/>
-    </g>
+    <svg viewBox="0 0 100 100" className="w-12 h-12">
+      {dots[value]?.map(([x, y], i) => (
+        <circle key={i} cx={x} cy={y} r="7" fill="#ffffff" />
+      ))}
+    </svg>
   );
 }
 
-/** Curvas de entrada tipo “abanico” */
-function EntryCurve({ C, side, color }:{
-  C:(n:number)=>number; side:"top"|"bottom"|"left"|"right"; color:string;
+/* ================== Tablero SVG ================== */
+
+function BoardSVG({
+  players,
+  turn,
+  onTokenClick,
+}: {
+  players: Player[];
+  turn: ColorKey;
+  onTokenClick: (idx: number) => void;
 }) {
-  const steps = [0,1,2,3,4,5];
+  const size = 560;
+  const cell = size / 15;
+
+  // Posiciones de fichas en patios (cárceles)
+  const jailPositions: Record<ColorKey, [number, number][]> = {
+    red: [
+      [cell * 10.8, cell * 1.2], [cell * 12.2, cell * 1.2],
+      [cell * 10.8, cell * 2.6], [cell * 12.2, cell * 2.6]
+    ],
+    blue: [
+      [cell * 1.2, cell * 1.2], [cell * 2.6, cell * 1.2],
+      [cell * 1.2, cell * 2.6], [cell * 2.6, cell * 2.6]
+    ],
+    green: [
+      [cell * 1.2, cell * 10.8], [cell * 2.6, cell * 10.8],
+      [cell * 1.2, cell * 12.2], [cell * 2.6, cell * 12.2]
+    ],
+    yellow: [
+      [cell * 10.8, cell * 10.8], [cell * 12.2, cell * 10.8],
+      [cell * 10.8, cell * 12.2], [cell * 12.2, cell * 12.2]
+    ],
+  };
+
+  function getTokenXY(color: ColorKey, pos: number, idx: number): [number, number] {
+    if (pos === -1) {
+      return jailPositions[color][idx];
+    }
+    
+    // Posiciones del tablero circular simplificado
+    const angle = (pos / 68) * Math.PI * 2 - Math.PI / 2;
+    const radius = cell * 4;
+    const x = cell * 7.5 + Math.cos(angle) * radius;
+    const y = cell * 7.5 + Math.sin(angle) * radius;
+    
+    return [x, y];
+  }
+
+  const allTokens = players.flatMap((p, pidx) =>
+    p.tokens.map((t, tidx) => ({
+      color: p.color,
+      pos: t.pos,
+      playerIdx: pidx,
+      tokenIdx: tidx,
+    }))
+  );
+
   return (
-    <g opacity=".95">
-      {steps.map((i) => {
-        const f = shade(color, 0.18 - i*0.03);
-        if (side==="top") {
-          // curva hacia el centro desde arriba
-          const x1 = C(6+i), y1 = C(5), x2 = C(7.5), y2 = C(7.5);
-          return <path key={i} d={`M ${x1} ${y1} Q ${C(7.5)} ${C(5+i*0.25)} ${x2} ${y2}`} stroke={f} strokeWidth={unit()} fill="none"/>;
-        }
-        if (side==="bottom") {
-          const x1 = C(6+i), y1 = C(10), x2 = C(7.5), y2 = C(7.5);
-          return <path key={i} d={`M ${x1} ${y1} Q ${C(7.5)} ${C(10 - i*0.25)} ${x2} ${y2}`} stroke={f} strokeWidth={unit()} fill="none"/>;
-        }
-        if (side==="left") {
-          const x1 = C(5), y1 = C(6+i), x2 = C(7.5), y2 = C(7.5);
-          return <path key={i} d={`M ${x1} ${y1} Q ${C(5 + i*0.25)} ${C(7.5)} ${x2} ${y2}`} stroke={f} strokeWidth={unit()} fill="none"/>;
-        }
-        // right
-        const x1 = C(10), y1 = C(6+i), x2 = C(7.5), y2 = C(7.5);
-        return <path key={i} d={`M ${x1} ${y1} Q ${C(10 - i*0.25)} ${C(7.5)} ${x2} ${y2}`} stroke={f} strokeWidth={unit()} fill="none"/>;
+    <svg 
+      viewBox={`0 0 ${size} ${size}`} 
+      className="w-full max-w-[500px] drop-shadow-2xl rounded-2xl"
+      style={{ background: '#fce4ec' }}
+    >
+      {/* Patios/Cárceles en las 4 esquinas */}
+      <rect x={cell * 9.5} y={cell * 0.5} width={cell * 4} height={cell * 4} 
+            fill={COLORS.red.hex} stroke="#000" strokeWidth="2" rx="12" />
+      <rect x={cell * 0.5} y={cell * 0.5} width={cell * 4} height={cell * 4} 
+            fill={COLORS.blue.hex} stroke="#000" strokeWidth="2" rx="12" />
+      <rect x={cell * 0.5} y={cell * 9.5} width={cell * 4} height={cell * 4} 
+            fill={COLORS.green.hex} stroke="#000" strokeWidth="2" rx="12" />
+      <rect x={cell * 9.5} y={cell * 9.5} width={cell * 4} height={cell * 4} 
+            fill={COLORS.yellow.hex} stroke="#000" strokeWidth="2" rx="12" />
+
+      {/* Caminos (simplificados) */}
+      <rect x={cell * 4.5} y={0} width={cell * 3} height={cell * 5} 
+            fill="#87ceeb" stroke="#000" strokeWidth="1.5" />
+      <rect x={cell * 7.5} y={0} width={cell * 2} height={cell * 5} 
+            fill="#ffb6c1" stroke="#000" strokeWidth="1.5" />
+      
+      <rect x={0} y={cell * 4.5} width={cell * 5} height={cell * 3} 
+            fill="#90ee90" stroke="#000" strokeWidth="1.5" />
+      <rect x={0} y={cell * 7.5} width={cell * 5} height={cell * 2} 
+            fill="#87ceeb" stroke="#000" strokeWidth="1.5" />
+      
+      <rect x={cell * 9.5} y={cell * 4.5} width={cell * 5} height={cell * 3} 
+            fill="#ffeb99" stroke="#000" strokeWidth="1.5" />
+      <rect x={cell * 9.5} y={cell * 7.5} width={cell * 5} height={cell * 2} 
+            fill="#ffb6c1" stroke="#000" strokeWidth="1.5" />
+      
+      <rect x={cell * 4.5} y={cell * 9.5} width={cell * 3} height={cell * 5} 
+            fill="#90ee90" stroke="#000" strokeWidth="1.5" />
+      <rect x={cell * 7.5} y={cell * 9.5} width={cell * 2} height={cell * 5} 
+            fill="#ffeb99" stroke="#000" strokeWidth="1.5" />
+
+      {/* Centro (Llegada) */}
+      <circle cx={cell * 7.5} cy={cell * 7.5} r={cell * 2.2} 
+              fill="#fff" stroke="#000" strokeWidth="3" />
+      
+      {/* Triángulos de llegada */}
+      <path d={`M ${cell * 7.5} ${cell * 5.3} L ${cell * 6} ${cell * 7.5} L ${cell * 9} ${cell * 7.5} Z`}
+            fill={COLORS.blue.hex} stroke="#000" strokeWidth="2" />
+      <path d={`M ${cell * 9.7} ${cell * 7.5} L ${cell * 7.5} ${cell * 6} L ${cell * 7.5} ${cell * 9} Z`}
+            fill={COLORS.red.hex} stroke="#000" strokeWidth="2" />
+      <path d={`M ${cell * 7.5} ${cell * 9.7} L ${cell * 6} ${cell * 7.5} L ${cell * 9} ${cell * 7.5} Z`}
+            fill={COLORS.yellow.hex} stroke="#000" strokeWidth="2" />
+      <path d={`M ${cell * 5.3} ${cell * 7.5} L ${cell * 7.5} ${cell * 6} L ${cell * 7.5} ${cell * 9} Z`}
+            fill={COLORS.green.hex} stroke="#000" strokeWidth="2" />
+
+      <circle cx={cell * 7.5} cy={cell * 7.5} r={cell * 0.6} 
+              fill="#ffd700" stroke="#000" strokeWidth="2" />
+
+      {/* Grid */}
+      {Array.from({ length: 15 }).map((_, i) => (
+        <g key={`grid-${i}`}>
+          <line x1={i * cell} y1={0} x2={i * cell} y2={size} 
+                stroke="#000" strokeWidth="0.5" opacity="0.2" />
+          <line x1={0} y1={i * cell} x2={size} y2={i * cell} 
+                stroke="#000" strokeWidth="0.5" opacity="0.2" />
+        </g>
+      ))}
+
+      {/* Fichas */}
+      {allTokens.map((t, idx) => {
+        const isMine = t.color === turn;
+        const [x, y] = getTokenXY(t.color, t.pos, t.tokenIdx);
+
+        return (
+          <g
+            key={`token-${idx}`}
+            onClick={() => isMine && onTokenClick(t.tokenIdx)}
+            style={{ cursor: isMine ? "pointer" : "default" }}
+          >
+            {isMine && (
+              <circle
+                cx={x}
+                cy={y}
+                r={cell * 0.5}
+                fill={COLORS[t.color].hex}
+                opacity="0.3"
+              >
+                <animate
+                  attributeName="opacity"
+                  values="0.2;0.6;0.2"
+                  dur="1.5s"
+                  repeatCount="indefinite"
+                />
+              </circle>
+            )}
+            <circle
+              cx={x}
+              cy={y}
+              r={cell * 0.35}
+              fill={COLORS[t.color].hex}
+              stroke="#000"
+              strokeWidth="2"
+              filter="drop-shadow(0 2px 4px rgba(0,0,0,0.4))"
+            />
+            <circle
+              cx={x - cell * 0.12}
+              cy={y - cell * 0.12}
+              r={cell * 0.12}
+              fill="rgba(255,255,255,0.6)"
+            />
+          </g>
+        );
       })}
-    </g>
+    </svg>
   );
-
-  function unit() { return C(1) - C(0) - 1.2; }
-}
-
-function Labels({ C }:{ C:(n:number)=>number }) {
-  const txt = (x:number,y:number,rot:number,str:string)=>(
-    <text x={x} y={y} transform={`rotate(${rot}, ${x}, ${y})`}
-          fontSize="12" fontWeight={800} fill="#fff" opacity=".95" textAnchor="middle">
-      {str}
-    </text>
-  );
-  return (
-    <g>
-      {txt(C(2.5),  C(4.7), 0, "SALIDA")}
-      {txt(C(12.5), C(4.7), 0, "SALIDA")}
-      {txt(C(2.5),  C(10.6), 0, "SEGURO")}
-      {txt(C(12.5), C(10.6), 0, "SEGURO")}
-      {txt(C(7.5),  C(2.7), 0, "SEGURO")}
-      {txt(C(7.5),  C(12.8), 0, "SEGURO")}
-      {txt(C(7.5),  C(7.9), 0, "LLEGADA")}
-    </g>
-  );
-}
-
-/* ===== util: aclarar/oscurecer color ===== */
-function shade(hex: string, amt: number) {
-  const h = hex.replace("#",""); const n = parseInt(h,16);
-  let r = (n>>16)&255, g = (n>>8)&255, b = n&255;
-  r = Math.max(0, Math.min(255, Math.round(r + 255*amt)));
-  g = Math.max(0, Math.min(255, Math.round(g + 255*amt)));
-  b = Math.max(0, Math.min(255, Math.round(b + 255*amt)));
-  return `rgb(${r},${g},${b})`;
 }
