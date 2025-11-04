@@ -25,23 +25,24 @@ const COLORS: Record<ColorKey, { hex: string; label: string }> = {
   yellow: { hex: "#fbbf24", label: "AMARILLO" },
 };
 
-// Mapa de posiciones del tablero (casilla -> [x, y])
+// MAPA EXACTO DEL TABLERO DIBUJADO A MANO
+// 68 casillas en el anillo (con seguros en blanco y salidas coloreadas)
 const BOARD_MAP: Record<number, [number, number]> = {
-  // Recorrido ROJO (comienza en casilla 5)
+  // ROJO - lado derecho superior (comienza en 5)
   5: [9, 6], 6: [10, 6], 7: [11, 6], 8: [12, 6], 9: [13, 6], 10: [14, 6],
   11: [14, 7], 12: [14, 8],
   
-  // AZUL (comienza en casilla 22)
+  // AZUL - lado derecho vertical (comienza en 22)
   13: [13, 8], 14: [12, 8], 15: [11, 8], 16: [10, 8], 17: [9, 8], 18: [8, 8],
   19: [8, 9], 20: [8, 10], 21: [8, 11], 22: [8, 12], 23: [8, 13], 24: [8, 14],
   25: [7, 14], 26: [6, 14],
   
-  // VERDE (comienza en casilla 39)
+  // VERDE - lado izquierdo superior (comienza en 39)
   27: [6, 13], 28: [6, 12], 29: [6, 11], 30: [6, 10], 31: [6, 9], 32: [6, 8],
   33: [5, 8], 34: [4, 8], 35: [3, 8], 36: [2, 8], 37: [1, 8], 38: [0, 8],
   39: [0, 7], 40: [0, 6],
   
-  // AMARILLO (comienza en casilla 56)
+  // AMARILLO - lado izquierdo inferior (comienza en 56)
   41: [1, 6], 42: [2, 6], 43: [3, 6], 44: [4, 6], 45: [5, 6], 46: [6, 6],
   47: [6, 5], 48: [6, 4], 49: [6, 3], 50: [6, 2], 51: [6, 1], 52: [6, 0],
   53: [7, 0], 54: [8, 0],
@@ -52,6 +53,34 @@ const BOARD_MAP: Record<number, [number, number]> = {
   67: [14, 7], 68: [14, 8],
 };
 
+// COLORES POR TIPO DE CASILLA EN EL ANILLO
+const BOARD_COLORS: Record<number, string> = {
+  // ROJO (5-12)
+  5: "#ef4444", 6: "#e8d4a0", 7: "#e8d4a0", 8: "#e8d4a0", 9: "#e8d4a0", 10: "#e8d4a0",
+  11: "#e8d4a0", 12: "#FFFFFF",
+  
+  // AZUL (13-26)
+  13: "#e8d4a0", 14: "#e8d4a0", 15: "#e8d4a0", 16: "#e8d4a0", 17: "#e8d4a0", 18: "#3b82f6",
+  19: "#3b82f6", 20: "#3b82f6", 21: "#3b82f6", 22: "#3b82f6", 23: "#e8d4a0", 24: "#e8d4a0",
+  25: "#e8d4a0", 26: "#FFFFFF",
+  
+  // VERDE (27-40)
+  27: "#e8d4a0", 28: "#e8d4a0", 29: "#FFFFFF", 30: "#22c55e", 31: "#22c55e", 32: "#22c55e",
+  33: "#22c55e", 34: "#22c55e", 35: "#22c55e", 36: "#e8d4a0", 37: "#e8d4a0", 38: "#e8d4a0",
+  39: "#22c55e", 40: "#e8d4a0",
+  
+  // AMARILLO (41-54)
+  41: "#e8d4a0", 42: "#e8d4a0", 43: "#e8d4a0", 44: "#fbbf24", 45: "#fbbf24", 46: "#FFFFFF",
+  47: "#fbbf24", 48: "#fbbf24", 49: "#fbbf24", 50: "#e8d4a0", 51: "#e8d4a0", 52: "#e8d4a0",
+  53: "#e8d4a0", 54: "#e8d4a0",
+  
+  // COMPLETAR (55-68)
+  55: "#e8d4a0", 56: "#e8d4a0", 57: "#e8d4a0", 58: "#e8d4a0", 59: "#e8d4a0", 60: "#e8d4a0",
+  61: "#e8d4a0", 62: "#e8d4a0", 63: "#FFFFFF", 64: "#e8d4a0", 65: "#e8d4a0", 66: "#e8d4a0",
+  67: "#e8d4a0", 68: "#e8d4a0",
+};
+
+// Rectas finales (8 casillas cada color)
 const FINAL_PATHS: Record<ColorKey, number[]> = {
   red: [100, 101, 102, 103, 104, 105, 106, 107],
   blue: [110, 111, 112, 113, 114, 115, 116, 117],
@@ -59,6 +88,7 @@ const FINAL_PATHS: Record<ColorKey, number[]> = {
   yellow: [130, 131, 132, 133, 134, 135, 136, 137],
 };
 
+// Posiciones de rectas finales
 const FINAL_MAP: Record<number, [number, number]> = {
   100: [13, 7], 101: [12, 7], 102: [11, 7], 103: [10, 7], 
   104: [9, 7], 105: [8, 7], 106: [7, 7], 107: [7, 7],
@@ -81,21 +111,8 @@ const FINAL_ENTRY: Record<ColorKey, number> = {
   red: 68, blue: 26, green: 40, yellow: 54
 };
 
-// 8 SEGUROS: Salida + 7 casillas, luego cada 5 casillas
-// Rojo: 5 (salida), 12 (5+7)
-// Azul: 22 (salida), 29 (22+7)
-// Verde: 39 (salida), 46 (39+7)
-// Amarillo: 56 (salida), 63 (56+7)
-const SAFE_CELLS = new Set([5, 12, 22, 29, 39, 46, 56, 63]);
-
-const EXIT_CELLS = new Set([5, 22, 39, 56]);
-
-const EXIT_COLORS: Record<number, string> = {
-  5: "#ef4444",
-  22: "#3b82f6",
-  39: "#22c55e",
-  56: "#fbbf24",
-};
+// 8 SEGUROS (casillas blancas)
+const SAFE_CELLS = new Set([12, 26, 29, 46, 63]);
 
 const nextPlayer = (p: ColorKey): ColorKey =>
   p === "red" ? "green" : p === "green" ? "yellow" : p === "yellow" ? "blue" : "red";
@@ -537,7 +554,7 @@ function DiceFace({ value }: { value: number }) {
   );
 }
 
-/* ================== Tablero SVG MÁS GRANDE ================== */
+/* ================== Tablero SVG ================== */
 
 function BoardSVG({
   players,
@@ -550,8 +567,8 @@ function BoardSVG({
   onTokenClick: (idx: number) => void;
   gamePhase: GamePhase;
 }) {
-  const size = 850; // Más grande (era 750)
-  const cell = 56; // Casillas más grandes
+  const size = 850;
+  const cell = 56;
 
   const jailPositions: Record<ColorKey, [number, number][]> = {
     red: [
@@ -609,7 +626,7 @@ function BoardSVG({
       className="w-full max-w-[850px] drop-shadow-2xl rounded-2xl"
       style={{ background: '#d4a574' }}
     >
-      {/* Patios - COLORES CORREGIDOS */}
+      {/* Patios */}
       <rect x={0} y={0} width={cell * 4} height={cell * 4} 
             fill={COLORS.green.hex} stroke="#000" strokeWidth="4" rx="16" />
       <rect x={cell * 11} y={0} width={cell * 4} height={cell * 4} 
@@ -622,14 +639,7 @@ function BoardSVG({
       {/* Casillas (1-68) */}
       {Object.entries(BOARD_MAP).map(([pos, [x, y]]) => {
         const cellPos = parseInt(pos);
-        let fill = "#e8d4a0";
-        
-        if (SAFE_CELLS.has(cellPos) && !EXIT_CELLS.has(cellPos)) {
-          fill = "#FFFFFF";
-        }
-        else if (EXIT_CELLS.has(cellPos)) {
-          fill = EXIT_COLORS[cellPos] + "DD";
-        }
+        const fill = BOARD_COLORS[cellPos] || "#e8d4a0";
         
         return (
           <rect
@@ -702,26 +712,6 @@ function BoardSVG({
       <text x={cell * 12.5} y={cell * 2.5} fontSize="20" fontWeight="bold" fill="#fff" textAnchor="middle">SALIDA</text>
       <text x={cell * 2} y={cell * 12.7} fontSize="20" fontWeight="bold" fill="#fff" textAnchor="middle">SALIDA</text>
       <text x={cell * 12.5} y={cell * 12.7} fontSize="20" fontWeight="bold" fill="#fff" textAnchor="middle">SALIDA</text>
-
-      {/* Estrellas en seguros */}
-      {[12, 29, 46, 63].map((pos) => {
-        if (BOARD_MAP[pos]) {
-          const [x, y] = BOARD_MAP[pos];
-          return (
-            <text 
-              key={`star-${pos}`}
-              x={x * cell + cell / 2} 
-              y={y * cell + cell / 2 + 7} 
-              fontSize="14" 
-              fill="#000" 
-              textAnchor="middle"
-            >
-              ⭐
-            </text>
-          );
-        }
-        return null;
-      })}
 
       {/* Fichas */}
       {allTokens.map((t) => {
