@@ -48,7 +48,7 @@ const BOARD_COLORS: Record<number, string> = {
   5: "#e8d4a0", 6: "#e8d4a0", 7: "#e8d4a0", 8: "#e8d4a0", 9: "#e8d4a0", 10: "#e8d4a0",
   11: "#e8d4a0", 12: "#e8d4a0",
   13: "#e8d4a0", 14: "#e8d4a0", 15: "#FFFFFF", 16: "#e8d4a0", 17: "#e8d4a0", 18: "#e8d4a0",
-  19: "#e8d4a0", 20: "#e8d4a0", 21: "#e8d4a0", 22: "#e8d4a0", 23: "#e8d4a0", 24: "#3b82f6",
+  19: "#e8d4a0", 20: "#e8d4a0", 21: "#3b82f6", 22: "#e8d4a0", 23: "#e8d4a0", 24: "#e8d4a0",
   25: "#FFFFFF", 26: "#e8d4a0",
   27: "#e8d4a0", 28: "#e8d4a0", 29: "#FFFFFF", 30: "#e8d4a0", 31: "#e8d4a0", 32: "#e8d4a0",
   33: "#e8d4a0", 34: "#e8d4a0", 35: "#fbbf24", 36: "#e8d4a0", 37: "#e8d4a0", 38: "#e8d4a0",
@@ -83,21 +83,20 @@ const FINAL_MAP: Record<number, [number, number]> = {
 };
 
 const START_POS: Record<ColorKey, number> = {
-  red: 63, blue: 24, green: 49, yellow: 35
+  red: 63, blue: 21, green: 49, yellow: 35
 };
 
 const FINAL_ENTRY: Record<ColorKey, number> = {
   red: 68, blue: 26, green: 54, yellow: 40
 };
 
-// Nuevos seguros
 const SAFE_CELLS = new Set([15, 25, 29, 39, 43, 53, 57, 67]);
 
-const EXIT_CELLS = new Set([63, 24, 49, 35]);
+const EXIT_CELLS = new Set([63, 21, 49, 35]);
 
 const EXIT_COLORS: Record<number, string> = {
   63: "#ef4444",
-  24: "#3b82f6",
+  21: "#3b82f6",
   49: "#22c55e",
   35: "#fbbf24",
 };
@@ -656,25 +655,33 @@ function BoardSVG({
         );
       })}
 
+      {/* Centro con triángulos de colores según llegada */}
       <g>
         <circle cx={cell * 7.5} cy={cell * 7.5} r={cell * 1.3} 
                 fill="#ffd700" stroke="#000" strokeWidth="4" />
         
+        {/* Triángulo ARRIBA - ROJO llega horizontal desde la derecha */}
         <path 
           d={`M ${cell * 7.5} ${cell * 6.2} L ${cell * 6.7} ${cell * 7.5} L ${cell * 8.3} ${cell * 7.5} Z`}
           fill={COLORS.red.hex} stroke="#000" strokeWidth="2"
         />
+        
+        {/* Triángulo DERECHA - AZUL llega vertical desde abajo */}
         <path 
           d={`M ${cell * 8.8} ${cell * 7.5} L ${cell * 7.5} ${cell * 6.7} L ${cell * 7.5} ${cell * 8.3} Z`}
           fill={COLORS.blue.hex} stroke="#000" strokeWidth="2"
         />
+        
+        {/* Triángulo IZQUIERDA - AMARILLO llega horizontal desde la izquierda */}
         <path 
           d={`M ${cell * 6.2} ${cell * 7.5} L ${cell * 7.5} ${cell * 6.7} L ${cell * 7.5} ${cell * 8.3} Z`}
-          fill={COLORS.green.hex} stroke="#000" strokeWidth="2"
+          fill={COLORS.yellow.hex} stroke="#000" strokeWidth="2"
         />
+        
+        {/* Triángulo ABAJO - VERDE llega vertical desde arriba */}
         <path 
           d={`M ${cell * 7.5} ${cell * 8.8} L ${cell * 6.7} ${cell * 7.5} L ${cell * 8.3} ${cell * 7.5} Z`}
-          fill={COLORS.yellow.hex} stroke="#000" strokeWidth="2"
+          fill={COLORS.green.hex} stroke="#000" strokeWidth="2"
         />
         
         <circle cx={cell * 7.5} cy={cell * 7.5} r={cell * 0.5} 
