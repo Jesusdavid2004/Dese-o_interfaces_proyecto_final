@@ -18,7 +18,7 @@ const FACE_TRANSFORM: Record<number, string> = {
   6: "rotateX(180deg) rotateY(0deg) rotateZ(0deg)",
 };
 
-function shuffle<T>(arr: T[]) {
+function shuffle<T>(arr: T[]): T[] {
   for (let i = arr.length - 1; i > 0; i--) {
     const j = Math.floor(Math.random() * (i + 1));
     [arr[i], arr[j]] = [arr[j], arr[i]];
@@ -45,15 +45,15 @@ export default function Dice3D({
   useEffect(() => {
     setMounted(true);
     refillCycle();
+
     return () => {
       if (t1.current) clearTimeout(t1.current);
       if (t2.current) clearTimeout(t2.current);
       if (t3.current) clearTimeout(t3.current);
     };
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
-  function refillCycle() {
+  function refillCycle(): void {
     const firstFive = shuffle([1, 2, 3, 4, 5]);
     cycleRef.current = [...firstFive, 6];
   }
@@ -61,18 +61,24 @@ export default function Dice3D({
   function nextFaceDistinct(current: number): number {
     if (cycleRef.current.length === 0) refillCycle();
     let next = cycleRef.current.shift()!;
+
     if (next === current) {
       if (cycleRef.current.length === 0) refillCycle();
       cycleRef.current.push(next);
       next = cycleRef.current.shift()!;
     }
+
     return next;
   }
 
-  const transform = useMemo(() => FACE_TRANSFORM[face] ?? FACE_TRANSFORM[1], [face]);
+  const transform = useMemo(
+    () => FACE_TRANSFORM[face] ?? FACE_TRANSFORM[1],
+    [face]
+  );
 
-  const roll = () => {
+  const roll = (): void => {
     if (disabled || phaseClass.includes("spinning")) return;
+
     const spins = ["spin-a", "spin-b", "spin-c"];
     setSpinClass(spins[Math.floor(Math.random() * spins.length)]);
     setPhaseClass("spinning");
@@ -83,7 +89,11 @@ export default function Dice3D({
       const next = nextFaceDistinct(face);
       setFace(next);
       setPhaseClass("finish-pop");
-      t2.current = setTimeout(() => setPhaseClass("wobble"), 120);
+
+      t2.current = setTimeout(() => {
+        setPhaseClass("wobble");
+      }, 120);
+
       t3.current = setTimeout(() => {
         setPhaseClass("");
         onRoll?.(next);
@@ -131,12 +141,50 @@ export default function Dice3D({
 function DiceFaces() {
   return (
     <>
-      <div className="dice-face dice-f1"><div className="dice-pip mc" /></div>
-      <div className="dice-face dice-f2"><div className="dice-pip tl" /><div className="dice-pip br" /></div>
-      <div className="dice-face dice-f3"><div className="dice-pip tl" /><div className="dice-pip mc" /><div className="dice-pip br" /></div>
-      <div className="dice-face dice-f4"><div className="dice-pip tl" /><div className="dice-pip tr" /><div className="dice-pip bl" /><div className="dice-pip br" /></div>
-      <div className="dice-face dice-f5"><div className="dice-pip tl" /><div className="dice-pip tr" /><div className="dice-pip mc" /><div className="dice-pip bl" /><div className="dice-pip br" /></div>
-      <div className="dice-face dice-f6"><div className="dice-pip tl" /><div className="dice-pip ml" /><div className="dice-pip bl" /><div className="dice-pip tr" /><div className="dice-pip mr" /><div className="dice-pip br" /></div>
+      {/* Cara 1: Un pip */}
+      <div className="dice-face dice-f1">
+        <div className="dice-pip mc" />
+      </div>
+
+      {/* Cara 2: Dos pips */}
+      <div className="dice-face dice-f2">
+        <div className="dice-pip tl" />
+        <div className="dice-pip br" />
+      </div>
+
+      {/* Cara 3: Tres pips */}
+      <div className="dice-face dice-f3">
+        <div className="dice-pip tl" />
+        <div className="dice-pip mc" />
+        <div className="dice-pip br" />
+      </div>
+
+      {/* Cara 4: Cuatro pips */}
+      <div className="dice-face dice-f4">
+        <div className="dice-pip tl" />
+        <div className="dice-pip tr" />
+        <div className="dice-pip bl" />
+        <div className="dice-pip br" />
+      </div>
+
+      {/* Cara 5: Cinco pips */}
+      <div className="dice-face dice-f5">
+        <div className="dice-pip tl" />
+        <div className="dice-pip tr" />
+        <div className="dice-pip mc" />
+        <div className="dice-pip bl" />
+        <div className="dice-pip br" />
+      </div>
+
+      {/* Cara 6: Seis pips */}
+      <div className="dice-face dice-f6">
+        <div className="dice-pip tl" />
+        <div className="dice-pip ml" />
+        <div className="dice-pip bl" />
+        <div className="dice-pip tr" />
+        <div className="dice-pip mr" />
+        <div className="dice-pip br" />
+      </div>
     </>
   );
 }
