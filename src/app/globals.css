@@ -28,6 +28,7 @@ html.light {
 * {
   -webkit-tap-highlight-color: transparent;
   -webkit-touch-callout: none;
+  box-sizing: border-box;
 }
 
 html {
@@ -73,7 +74,9 @@ html {
 html, body {
   height: 100%;
   width: 100%;
-  overflow-x: hidden;
+  overflow-x: hidden !important;
+  margin: 0;
+  padding: 0;
 }
 
 body {
@@ -87,7 +90,46 @@ body {
 main {
   flex: 1;
   width: 100%;
+  max-width: 100%;
+  overflow-x: hidden !important;
   -webkit-overflow-scrolling: touch;
+  padding: 0;
+  margin: 0;
+}
+
+/* ===================================
+   FIX OVERFLOW / DOUBLE SCROLL
+=================================== */
+img, video, iframe {
+  max-width: 100%;
+  height: auto;
+  display: block;
+}
+
+input, textarea, select, form {
+  max-width: 100%;
+  width: 100%;
+  box-sizing: border-box;
+}
+
+/* ===================================
+   SCROLL BAR STYLING
+=================================== */
+::-webkit-scrollbar {
+  width: 8px;
+}
+
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+::-webkit-scrollbar-thumb {
+  background: rgba(100, 100, 100, 0.5);
+  border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: rgba(100, 100, 100, 0.8);
 }
 
 /* ===================================
@@ -273,6 +315,218 @@ main {
 @media (prefers-reduced-motion: reduce) {
   .dice-cube { transition: none !important; }
   .spinning, .finish-pop, .wobble { animation: none !important; }
+}
+
+/* ===================================
+   RECUADRO CONTENEDOR - GRIS OSCURO
+=================================== */
+.content-box {
+  background: rgba(200, 200, 200, 0.75);
+  backdrop-filter: blur(12px);
+  border-radius: 2rem;
+  border: 2px solid rgba(100, 100, 100, 0.3);
+  box-shadow: 0 20px 40px rgba(0, 0, 0, 0.15);
+  padding: clamp(1.5rem, 5vw, 3rem);
+  margin: clamp(1rem, 4vh, 2rem);
+}
+
+.dark .content-box {
+  background: rgba(60, 70, 80, 0.8);
+  border: 2px solid rgba(150, 150, 150, 0.2);
+  box-shadow: 0 20px 40px rgba(0, 0, 0, 0.4);
+}
+
+/* ===================================
+   CÍRCULOS DECORATIVOS - RESPONSIVE
+=================================== */
+.decorator-circles {
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+  z-index: 0;
+  overflow: hidden;
+}
+
+.circle-deco {
+  position: fixed;
+  border-radius: 9999px;
+  filter: blur(60px);
+  opacity: 0.25;
+}
+
+/* Círculo Rojo - Arriba a la izquierda */
+.circle-red {
+  width: clamp(100px, 20vw, 220px);
+  height: clamp(100px, 20vw, 220px);
+  background: radial-gradient(circle at 35% 35%, #991b1b 0%, #7f1d1d 40%, rgba(127, 29, 29, 0) 100%);
+  top: clamp(10px, 5vh, 50px);
+  left: clamp(10px, 3vw, 40px);
+  box-shadow: 0 0 80px rgba(153, 27, 27, 0.15);
+}
+
+.dark .circle-red {
+  opacity: 0.3;
+  box-shadow: 0 0 80px rgba(220, 38, 38, 0.2);
+}
+
+/* Círculo Azul - Arriba a la derecha */
+.circle-blue {
+  width: clamp(120px, 22vw, 250px);
+  height: clamp(120px, 22vw, 250px);
+  background: radial-gradient(circle at 35% 35%, #1e40af 0%, #1e3a8a 40%, rgba(30, 58, 138, 0) 100%);
+  top: clamp(10px, 4vh, 45px);
+  right: clamp(10px, 3vw, 40px);
+  box-shadow: 0 0 80px rgba(37, 99, 235, 0.15);
+}
+
+.dark .circle-blue {
+  opacity: 0.3;
+  box-shadow: 0 0 80px rgba(59, 130, 246, 0.2);
+}
+
+/* Círculo Amarillo - Abajo a la izquierda */
+.circle-yellow {
+  width: clamp(110px, 21vw, 230px);
+  height: clamp(110px, 21vw, 230px);
+  background: radial-gradient(circle at 35% 35%, #b45309 0%, #92400e 40%, rgba(146, 64, 14, 0) 100%);
+  bottom: clamp(10px, 5vh, 50px);
+  left: clamp(10px, 4vw, 50px);
+  box-shadow: 0 0 80px rgba(217, 119, 6, 0.15);
+}
+
+.dark .circle-yellow {
+  opacity: 0.3;
+  box-shadow: 0 0 80px rgba(251, 146, 60, 0.2);
+}
+
+/* Círculo Verde - Abajo a la derecha */
+.circle-green {
+  width: clamp(110px, 21vw, 230px);
+  height: clamp(110px, 21vw, 230px);
+  background: radial-gradient(circle at 35% 35%, #15803d 0%, #166534 40%, rgba(22, 101, 52, 0) 100%);
+  bottom: clamp(10px, 6vh, 60px);
+  right: clamp(10px, 4vw, 50px);
+  box-shadow: 0 0 80px rgba(34, 197, 94, 0.15);
+}
+
+.dark .circle-green {
+  opacity: 0.3;
+  box-shadow: 0 0 80px rgba(74, 222, 128, 0.2);
+}
+
+/* Responsive - Ajustes para tablet */
+@media (max-width: 1024px) {
+  .circle-red {
+    width: clamp(85px, 18vw, 180px);
+    height: clamp(85px, 18vw, 180px);
+  }
+
+  .circle-blue {
+    width: clamp(100px, 20vw, 200px);
+    height: clamp(100px, 20vw, 200px);
+  }
+
+  .circle-yellow {
+    width: clamp(95px, 19vw, 190px);
+    height: clamp(95px, 19vw, 190px);
+  }
+
+  .circle-green {
+    width: clamp(95px, 19vw, 190px);
+    height: clamp(95px, 19vw, 190px);
+  }
+}
+
+/* Responsive - Ajustes para móvil */
+@media (max-width: 768px) {
+  .circle-deco {
+    filter: blur(50px);
+    opacity: 0.2;
+  }
+
+  .circle-red {
+    width: clamp(70px, 16vw, 140px);
+    height: clamp(70px, 16vw, 140px);
+    top: clamp(5px, 3vh, 30px);
+    left: clamp(5px, 2.5vw, 25px);
+    box-shadow: 0 0 60px rgba(153, 27, 27, 0.1);
+  }
+
+  .dark .circle-red {
+    box-shadow: 0 0 60px rgba(220, 38, 38, 0.15);
+  }
+
+  .circle-blue {
+    width: clamp(80px, 18vw, 160px);
+    height: clamp(80px, 18vw, 160px);
+    top: clamp(5px, 2vh, 25px);
+    right: clamp(5px, 2.5vw, 25px);
+    box-shadow: 0 0 60px rgba(37, 99, 235, 0.1);
+  }
+
+  .dark .circle-blue {
+    box-shadow: 0 0 60px rgba(59, 130, 246, 0.15);
+  }
+
+  .circle-yellow {
+    width: clamp(75px, 17vw, 150px);
+    height: clamp(75px, 17vw, 150px);
+    bottom: clamp(10px, 4vh, 35px);
+    left: clamp(5px, 3vw, 28px);
+    box-shadow: 0 0 60px rgba(217, 119, 6, 0.1);
+  }
+
+  .dark .circle-yellow {
+    box-shadow: 0 0 60px rgba(251, 146, 60, 0.15);
+  }
+
+  .circle-green {
+    width: clamp(75px, 17vw, 150px);
+    height: clamp(75px, 17vw, 150px);
+    bottom: clamp(5px, 3.5vh, 30px);
+    right: clamp(5px, 3vw, 28px);
+    box-shadow: 0 0 60px rgba(34, 197, 94, 0.1);
+  }
+
+  .dark .circle-green {
+    box-shadow: 0 0 60px rgba(74, 222, 128, 0.15);
+  }
+}
+
+/* Responsive - Móvil pequeño */
+@media (max-width: 640px) {
+  .circle-deco {
+    filter: blur(45px);
+    opacity: 0.15;
+  }
+
+  .circle-red {
+    width: clamp(60px, 14vw, 120px);
+    height: clamp(60px, 14vw, 120px);
+    top: clamp(5px, 2vh, 20px);
+    left: clamp(5px, 2vw, 20px);
+  }
+
+  .circle-blue {
+    width: clamp(70px, 16vw, 140px);
+    height: clamp(70px, 16vw, 140px);
+    top: clamp(5px, 1vh, 15px);
+    right: clamp(5px, 2vw, 20px);
+  }
+
+  .circle-yellow {
+    width: clamp(65px, 15vw, 130px);
+    height: clamp(65px, 15vw, 130px);
+    bottom: clamp(10px, 3vh, 30px);
+    left: clamp(5px, 2.5vw, 20px);
+  }
+
+  .circle-green {
+    width: clamp(65px, 15vw, 130px);
+    height: clamp(65px, 15vw, 130px);
+    bottom: clamp(5px, 3vh, 25px);
+    right: clamp(5px, 2.5vw, 20px);
+  }
 }
 
 /* ===================================
