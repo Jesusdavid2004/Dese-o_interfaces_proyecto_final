@@ -1,11 +1,11 @@
-import SiteNav from "@/components/SiteNav"
+
 import { Camera, Music, Plane, Coffee } from "lucide-react"
 import TokenDecor from "@/components/TokenDecor"
 
 export default function HobbiesPage() {
   return (
     <main className="mx-auto max-w-6xl px-4 pb-24">
-      <SiteNav />
+ 
 
       <section className="mt-8">
         <h2 className="text-3xl font-extrabold text-center mb-6">Un poco sobre mí</h2>

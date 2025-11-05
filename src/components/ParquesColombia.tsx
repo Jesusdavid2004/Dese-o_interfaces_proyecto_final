@@ -101,10 +101,6 @@ const HOME_ENTRY: Record<ColorKey, number> = {
 
 const SAFE_CELLS = new Set([15, 25, 29, 39, 43, 53, 57, 67]);
 
-// ✅ REMOVIDAS ESTAS LÍNEAS QUE CAUSABAN ERROR:
-// const EXIT_CELLS = new Set([63, 21, 49, 35]);
-// const EXIT_COLORS: Record<number, string> = { ... };
-
 // ==================== FUNCIONES DE MOVIMIENTO ====================
 
 function calculateNewPosition(
@@ -280,7 +276,7 @@ export default function ParquesColombia() {
       const order = sorted.map(r => r.color);
       setPlayerOrder(order);
       setGamePhase("playing");
-      setHint(`Comienza ${COLORS[order[0]].label}. Lanza para sacar pares.`);
+      setHint(`🎮 Orden: ${COLORS[order[0]].label} comienza → Lanza para PARES`);
       
       setTimeout(() => {
         setDice1(0);
@@ -288,7 +284,7 @@ export default function ParquesColombia() {
         setDiceRolled(false);
       }, 2000);
     } else {
-      setHint(`${COLORS[playerColor].label}: ${sum}. Siguiente.`);
+      setHint(`🔢 ${COLORS[playerColor].label}: ${sum} pts → Siguiente`);
       setTimeout(() => {
         setDice1(0);
         setDice2(0);
@@ -319,17 +315,17 @@ export default function ParquesColombia() {
     
     if (allInJail) {
       if (isPair) {
-        setHint(`¡Pares! ${dice1}=${value}. Saca ficha.`);
+        setHint(`✨ ¡PARES! ${dice1} = ${value} → Saca ficha`);
         setPairAttempts(0);
       } else {
         const newAttempts = pairAttempts + 1;
         setPairAttempts(newAttempts);
         
         if (newAttempts >= 3) {
-          setHint(`3 intentos. Pasa turno.`);
+          setHint(`❌ 3 intentos sin pares. Pasa turno.`);
           setTimeout(() => passTurn(), 2000);
         } else {
-          setHint(`Sin pares. ${3 - newAttempts} intentos.`);
+          setHint(`📍 Sin pares. ${3 - newAttempts} intentos restantes`);
           setTimeout(() => {
             setDice1(0);
             setDice2(0);
@@ -339,9 +335,9 @@ export default function ParquesColombia() {
       }
     } else {
       if (isPair) {
-        setHint(`¡Pares! Mueve y tira.`);
+        setHint(`✨ ¡PARES! Mueve y tira de nuevo`);
       } else {
-        setHint(`${dice1} y ${value}. Mueve.`);
+        setHint(`🎯 ${dice1} + ${value} = Mueve fichas`);
       }
     }
   }
@@ -491,7 +487,16 @@ export default function ParquesColombia() {
           </div>
         )}
         
-        <p className="text-sm text-gray-300 mb-1">{hint}</p>
+        <p className={`text-sm font-semibold mb-1 transition-colors duration-300 ${
+          gamePhase === "order" 
+            ? 'text-gray-700 dark:text-gray-200' 
+            : currentColor === 'red' ? 'text-red-600 dark:text-red-400' :
+              currentColor === 'blue' ? 'text-blue-600 dark:text-blue-400' :
+              currentColor === 'green' ? 'text-green-600 dark:text-green-400' :
+              'text-amber-600 dark:text-amber-400'
+        }`}>
+          {hint}
+        </p>
         
         {gamePhase === "playing" && (
           <div className="flex justify-center gap-4 text-xs text-gray-400">
@@ -560,6 +565,7 @@ export default function ParquesColombia() {
   );
 }
 
+// ✨ COMPONENTE DICE MEJORADO CON MEJOR CONTRASTE
 function DiceContainer({ 
   value, 
   used,
@@ -577,23 +583,31 @@ function DiceContainer({
 }) {
   return (
     <div className="flex flex-col items-center gap-2">
-      <p className="text-xs text-gray-400 font-semibold">{label}</p>
+      <p className="text-xs text-gray-600 dark:text-gray-300 font-semibold uppercase tracking-wide">{label}</p>
       <div 
-        className={`relative w-28 h-28 rounded-xl shadow-2xl border-3 border-gray-700 bg-gradient-to-br from-gray-900 to-gray-800 flex items-center justify-center ${
-          used ? 'opacity-40' : ''
-        }`}
+        className={`relative w-28 h-28 rounded-xl shadow-lg flex items-center justify-center transition-all duration-300 ${
+          used ? 'opacity-40' : 'opacity-100'
+        } bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700`}
+        style={{
+          perspective: '1000px'
+        }}
       >
         {value === 0 ? (
-          // ✅ FIXED: Eliminado el "as any"
-          <div style={{ "--dice-size": "100px" } as React.CSSProperties}>
+          <div 
+            style={{ 
+              "--dice-size": "100px",
+              perspective: '1000px'
+            } as React.CSSProperties}
+            className="animate-pulse"
+          >
             <Dice3D onRoll={onRoll} size={100} disabled={disabled} />
           </div>
         ) : (
           <DiceFace value={value} />
         )}
       </div>
-      {!disabled && value === 0 && <p className="text-xs text-green-400">🎲</p>}
-      {waitingForFirst && <p className="text-xs text-gray-500">...</p>}
+      {!disabled && value === 0 && <p className="text-xs text-green-500 font-bold animate-bounce">🎲 Lanza</p>}
+      {waitingForFirst && <p className="text-xs text-gray-500 animate-pulse">⏳ Esperando...</p>}
     </div>
   );
 }
@@ -611,7 +625,7 @@ function DiceFace({ value }: { value: number }) {
   return (
     <svg viewBox="0 0 100 100" className="w-18 h-18">
       {dots[value]?.map(([x, y], i) => (
-        <circle key={i} cx={x} cy={y} r="9" fill="#fff" />
+        <circle key={i} cx={x} cy={y} r="9" fill="#000" />
       ))}
     </svg>
   );

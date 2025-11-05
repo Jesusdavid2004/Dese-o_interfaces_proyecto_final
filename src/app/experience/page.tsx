@@ -1,10 +1,10 @@
-import SiteNav from "@/components/SiteNav"
+
 import TokenDecor from "@/components/TokenDecor"
 
 export default function ExperiencePage() {
   return (
     <main className="mx-auto max-w-6xl px-4 pb-24">
-      <SiteNav />
+
 
       <section className="mt-8">
         <h2 className="text-3xl font-extrabold mb-2">Mi Experiencia</h2>

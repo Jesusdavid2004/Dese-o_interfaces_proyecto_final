@@ -1,10 +1,9 @@
-"use client"
+"use client";
 
-import { useCallback } from "react"
-import { useRouter } from "next/navigation"
-import Dice3D from "../components/Dice3D"
-import TokenDecor from "../components/TokenDecor"
-import BackgroundFX from "../components/BackgroundFX"
+import { useCallback } from "react";
+import { useRouter } from "next/navigation";
+import Dice3D from "../components/Dice3D";
+import TokenDecor from "../components/TokenDecor";
 
 const ROUTES: Record<number, string> = {
   1: "/about",
@@ -13,23 +12,22 @@ const ROUTES: Record<number, string> = {
   4: "/services",
   5: "/hobbies",
   6: "/contact",
-}
+};
 
 export default function Page() {
-  const router = useRouter()
+  const router = useRouter();
 
   const handleRoll = useCallback((n: number) => {
-    const to = ROUTES[n]
-    if (to) router.push(to)
-  }, [router])
+    const to = ROUTES[n];
+    if (to) router.push(to);
+  }, [router]);
 
   return (
     <main className="min-h-screen grid place-items-center p-6">
       <section className="relative rounded-3xl w-full max-w-4xl p-12 grid place-items-center text-center overflow-hidden">
-
-        {/* Fondo animado (blobs + noise) */}
-        <BackgroundFX />
-        {/* Mesa verde suave por encima del fondo animado */}
+        
+        {/* ✅ CORREGIDO: Eliminado BackgroundFX (ya está en providers.tsx) */}
+        {/* Mesa verde suave */}
         <div className="absolute inset-0 board-bg opacity-60" />
 
         {/* Tokens decorativos en esquinas con flotación */}
@@ -55,5 +53,5 @@ export default function Page() {
         </div>
       </section>
     </main>
-  )
+  );
 }

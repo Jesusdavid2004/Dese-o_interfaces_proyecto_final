@@ -1,4 +1,4 @@
-import SiteNav from "@/components/SiteNav";
+
 import { Gamepad2 } from "lucide-react";
 import { ProjectCard } from "@/components/ProjectCard";
 import ParquesColombia from "@/components/ParquesColombia";
@@ -6,9 +6,6 @@ import ParquesColombia from "@/components/ParquesColombia";
 export default function ProjectsPage() {
   return (
     <main className="mx-auto max-w-6xl px-4 pb-24">
-      {/* Barra de navegación */}
-      <SiteNav />
-
       {/* Sección principal */}
       <section className="mt-8">
         {/* Título y encabezado */}

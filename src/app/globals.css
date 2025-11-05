@@ -1,57 +1,93 @@
+/* ✅ Fondos por defecto - oscuro primero */
+html {
+  background-color: #111827 !important;
+  color: #f3f4f6 !important;
+}
+
+html.light {
+  background-color: #f9fafb !important;
+  color: #111827 !important;
+}
+
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
 
-/* -----------------------------------
-   Base
------------------------------------ */
+/* ===================================
+   VARIABLES Y BASE
+=================================== */
 :root {
   color-scheme: light dark;
   --pip: 22%; /* separación para pips del dado */
 }
 
-html { scroll-behavior: smooth; }
+html {
+  scroll-behavior: smooth;
+}
 
-html, body {
-  min-height: 100%;
-  height: auto;
-  overflow-y: auto; /* fix: asegura scroll vertical */
+html,
+body {
+  min-height: 100vh;
+  height: 100%;
+  overflow-y: auto;
 }
 
 body {
-  @apply bg-forest-50 text-gray-900 antialiased transition-colors duration-300;
-}
-.dark body {
-  @apply bg-forest-900 text-gray-100;
+  @apply bg-white dark:bg-gray-900 text-gray-900 dark:text-gray-100 antialiased transition-colors duration-300;
+  display: flex;
+  flex-direction: column;
 }
 
-/* -----------------------------------
-   Cards / Badges / Texto
------------------------------------ */
+/* ===================================
+   CENTRADO DE CONTENIDO - MÁS ARRIBA
+=================================== */
+main {
+  @apply flex-1 flex items-center justify-center;
+  padding-top: 4rem; /* Más arriba */
+}
+
+/* ===================================
+   CARDS / BADGES / TEXTO
+=================================== */
 .card {
-  @apply rounded-2xl shadow-soft bg-white text-gray-900 transition-colors duration-300;
+  @apply rounded-2xl shadow-soft bg-white dark:bg-neutral-900 text-gray-900 dark:text-gray-100 transition-colors duration-300;
 }
-.dark .card { @apply bg-neutral-900 text-gray-100; }
 
-.muted { @apply text-gray-600; }
-.dark .muted { @apply text-gray-300; }
+.muted {
+  @apply text-gray-600 dark:text-gray-300;
+}
 
 .badge {
   @apply inline-flex items-center gap-2 px-3 py-1 rounded-full text-sm font-medium;
 }
 
-/* -----------------------------------
-   Fondo mesa verde
------------------------------------ */
+/* ===================================
+   FONDO MESA (MODO CLARO ELEGANTE Y PROFESIONAL)
+=================================== */
 .board-bg {
-  background: radial-gradient(ellipse at center, #A5D6A7 0%, #1B5E20 80%);
+  background: radial-gradient(
+    ellipse at center, 
+    #e6e8eb 0%,
+    #d4d8dd 40%,
+    #c0c5cc 100%
+  );
+  box-shadow: 0 25px 70px rgba(0, 0, 0, 0.18);
 }
 
-/* =========================
-   DADO 3D — COMPATIBLE CON <Dice3D />
-   ========================= */
+.dark .board-bg {
+  background: radial-gradient(
+    ellipse at center, 
+    #2d3e3a 0%, 
+    #1a2522 60%,
+    #0f1613 100%
+  );
+}
 
-/* Botón contenedor (no pone perspectiva) */
+/* ===================================
+   DADO 3D — COMPATIBLE CON <Dice3D />
+=================================== */
+
+/* Botón contenedor */
 .dice-3d {
   position: relative;
   display: inline-block;
@@ -60,21 +96,20 @@ body {
   background: transparent;
   cursor: pointer;
   -webkit-tap-highlight-color: transparent;
-  z-index: 30; /* por encima de tarjetas/fondos */
-  /* Tamaño configurable desde el componente: style="--dice-size: 120px" */
+  z-index: 30;
   --dice-size: 120px;
 }
 
-/* Wrapper: perspectiva y animaciones de giro/sombra */
+/* Wrapper: perspectiva y animaciones */
 .dice-anim-wrap {
   width: var(--dice-size);
   height: var(--dice-size);
-  perspective: 1000px;          /* CLAVE: activa el 3D */
+  perspective: 1000px;
   display: grid;
   place-items: center;
-  overflow: visible;            /* evita recortes en wobble */
+  overflow: visible;
   will-change: transform, filter;
-  filter: drop-shadow(0 12px 18px rgba(0,0,0,.25));
+  filter: drop-shadow(0 12px 18px rgba(0, 0, 0, 0.25));
 }
 
 /* Cubo: mantiene la rotación final de la cara */
@@ -82,275 +117,560 @@ body {
   position: relative;
   width: var(--dice-size);
   height: var(--dice-size);
-  transform-style: preserve-3d; /* CLAVE: conserva 3D en hijos */
-  transition: transform .65s cubic-bezier(.2,.8,.2,1);
+  transform-style: preserve-3d;
+  transition: transform 0.65s cubic-bezier(0.2, 0.8, 0.2, 1);
   will-change: transform;
 }
 
 /* Caras del cubo */
 .dice-face {
-  position: absolute; inset: 0;
-  background: linear-gradient(180deg,#ffffff,#eef0f3) !important;
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(180deg, #ffffff, #eef0f3) !important;
   border-radius: calc(var(--dice-size) * 0.18);
-  border: 3px solid rgba(0,0,0,.08);
-  box-shadow:
-    inset 0 2px 0 rgba(255,255,255,.9),
-    inset 0 -6px 10px rgba(0,0,0,.12);
+  border: 3px solid rgba(0, 0, 0, 0.08);
+  box-shadow: inset 0 2px 0 rgba(255, 255, 255, 0.9),
+    inset 0 -6px 10px rgba(0, 0, 0, 0.12);
   backface-visibility: hidden;
-  /* grid 3x3 para pips */
   display: grid;
-  grid-template: repeat(3,1fr) / repeat(3,1fr);
-}
-.dark .dice-face {
-  background: linear-gradient(180deg,#f3f4f6,#e5e7eb) !important;
-  border-color: rgba(255,255,255,.07);
+  grid-template: repeat(3, 1fr) / repeat(3, 1fr);
 }
 
-/* Posición de las 6 caras (mitad del tamaño hacia Z) */
-.dice-f1 { transform: rotateY(   0deg) translateZ(calc(var(--dice-size)/2)); } /* front  */
-.dice-f2 { transform: rotateX(  90deg) translateZ(calc(var(--dice-size)/2)); } /* top    */
-.dice-f3 { transform: rotateY(  90deg) translateZ(calc(var(--dice-size)/2)); } /* right  */
-.dice-f4 { transform: rotateY( -90deg) translateZ(calc(var(--dice-size)/2)); } /* left   */
-.dice-f5 { transform: rotateX( -90deg) translateZ(calc(var(--dice-size)/2)); } /* bottom */
-.dice-f6 { transform: rotateY( 180deg) translateZ(calc(var(--dice-size)/2)); } /* back   */
+.dark .dice-face {
+  background: linear-gradient(180deg, #f3f4f6, #e5e7eb) !important;
+  border-color: rgba(255, 255, 255, 0.07);
+}
+
+/* Posición de las 6 caras */
+.dice-f1 {
+  transform: rotateY(0deg) translateZ(calc(var(--dice-size) / 2));
+}
+.dice-f2 {
+  transform: rotateX(90deg) translateZ(calc(var(--dice-size) / 2));
+}
+.dice-f3 {
+  transform: rotateY(90deg) translateZ(calc(var(--dice-size) / 2));
+}
+.dice-f4 {
+  transform: rotateY(-90deg) translateZ(calc(var(--dice-size) / 2));
+}
+.dice-f5 {
+  transform: rotateX(-90deg) translateZ(calc(var(--dice-size) / 2));
+}
+.dice-f6 {
+  transform: rotateY(180deg) translateZ(calc(var(--dice-size) / 2));
+}
 
 /* Pips */
 .dice-pip {
   width: calc(var(--dice-size) * 0.16);
   height: calc(var(--dice-size) * 0.16);
   border-radius: 9999px;
-  background: radial-gradient(circle at 30% 30%, #1f2937 0%, #0f172a 65%, #0b1220 100%);
-  box-shadow: inset 0 1px 1px rgba(255,255,255,.35), 0 1px 0 rgba(0,0,0,.25);
+  background: radial-gradient(
+    circle at 30% 30%,
+    #1f2937 0%,
+    #0f172a 65%,
+    #0b1220 100%
+  );
+  box-shadow: inset 0 1px 1px rgba(255, 255, 255, 0.35),
+    0 1px 0 rgba(0, 0, 0, 0.25);
   place-self: center;
 }
+
 .dark .dice-pip {
-  background: radial-gradient(circle at 30% 30%, #111827 0%, #0b1220 70%, #0a0f1a 100%);
+  background: radial-gradient(
+    circle at 30% 30%,
+    #111827 0%,
+    #0b1220 70%,
+    #0a0f1a 100%
+  );
 }
 
 /* Posiciones en la rejilla 3x3 */
-.dice-pip.tl { grid-area: 1 / 1; }
-.dice-pip.tc { grid-area: 1 / 2; }
-.dice-pip.tr { grid-area: 1 / 3; }
-.dice-pip.ml { grid-area: 2 / 1; }
-.dice-pip.mc { grid-area: 2 / 2; }
-.dice-pip.mr { grid-area: 2 / 3; }
-.dice-pip.bl { grid-area: 3 / 1; }
-.dice-pip.bc { grid-area: 3 / 2; }
-.dice-pip.br { grid-area: 3 / 3; }
+.dice-pip.tl {
+  grid-area: 1 / 1;
+}
+.dice-pip.tc {
+  grid-area: 1 / 2;
+}
+.dice-pip.tr {
+  grid-area: 1 / 3;
+}
+.dice-pip.ml {
+  grid-area: 2 / 1;
+}
+.dice-pip.mc {
+  grid-area: 2 / 2;
+}
+.dice-pip.mr {
+  grid-area: 2 / 3;
+}
+.dice-pip.bl {
+  grid-area: 3 / 1;
+}
+.dice-pip.bc {
+  grid-area: 3 / 2;
+}
+.dice-pip.br {
+  grid-area: 3 / 3;
+}
 
 /* Animaciones del wrapper */
 @keyframes dice-spin-a {
-  0%   { transform: translateY(0) rotateX(0deg)   rotateY(0deg)   rotateZ(0deg) }
-  40%  { transform: translateY(-12px) rotateX(220deg) rotateY(120deg) rotateZ(10deg) }
-  70%  { transform: translateY(-6px)  rotateX(340deg) rotateY(250deg) rotateZ(-6deg) }
-  100% { transform: translateY(0) rotateX(360deg) rotateY(360deg) rotateZ(0deg) }
+  0% {
+    transform: translateY(0) rotateX(0deg) rotateY(0deg) rotateZ(0deg);
+  }
+  40% {
+    transform: translateY(-12px) rotateX(220deg) rotateY(120deg) rotateZ(10deg);
+  }
+  70% {
+    transform: translateY(-6px) rotateX(340deg) rotateY(250deg) rotateZ(-6deg);
+  }
+  100% {
+    transform: translateY(0) rotateX(360deg) rotateY(360deg) rotateZ(0deg);
+  }
 }
+
 @keyframes dice-spin-b {
-  0%   { transform: translateY(0) rotateX(0deg) rotateY(0deg) rotateZ(0deg) }
-  35%  { transform: translateY(-10px) rotateX(160deg) rotateY(260deg) rotateZ(-8deg) }
-  85%  { transform: translateY(-4px)  rotateX(300deg) rotateY(440deg) rotateZ(6deg) }
-  100% { transform: translateY(0) rotateX(360deg) rotateY(540deg) rotateZ(0deg) }
+  0% {
+    transform: translateY(0) rotateX(0deg) rotateY(0deg) rotateZ(0deg);
+  }
+  35% {
+    transform: translateY(-10px) rotateX(160deg) rotateY(260deg) rotateZ(-8deg);
+  }
+  85% {
+    transform: translateY(-4px) rotateX(300deg) rotateY(440deg) rotateZ(6deg);
+  }
+  100% {
+    transform: translateY(0) rotateX(360deg) rotateY(540deg) rotateZ(0deg);
+  }
 }
+
 @keyframes dice-spin-c {
-  0%   { transform: translateY(0) rotateX(0deg) rotateY(0deg) rotateZ(0deg) }
-  45%  { transform: translateY(-14px) rotateX(260deg) rotateY(60deg) rotateZ(14deg) }
-  80%  { transform: translateY(-6px)  rotateX(380deg) rotateY(140deg) rotateZ(-8deg) }
-  100% { transform: translateY(0) rotateX(450deg) rotateY(180deg) rotateZ(0deg) }
+  0% {
+    transform: translateY(0) rotateX(0deg) rotateY(0deg) rotateZ(0deg);
+  }
+  45% {
+    transform: translateY(-14px) rotateX(260deg) rotateY(60deg) rotateZ(14deg);
+  }
+  80% {
+    transform: translateY(-6px) rotateX(380deg) rotateY(140deg) rotateZ(-8deg);
+  }
+  100% {
+    transform: translateY(0) rotateX(450deg) rotateY(180deg) rotateZ(0deg);
+  }
 }
+
 @keyframes dice-shadow-breathe {
-  0%,100% { filter: drop-shadow(0 12px 18px rgba(0,0,0,.25)); }
-  50%     { filter: drop-shadow(0 22px 28px rgba(0,0,0,.35)); }
+  0%,
+  100% {
+    filter: drop-shadow(0 12px 18px rgba(0, 0, 0, 0.25));
+  }
+  50% {
+    filter: drop-shadow(0 22px 28px rgba(0, 0, 0, 0.35));
+  }
 }
-@keyframes dice-pop { 0%{transform:scale(1)} 30%{transform:scale(1.06)} 100%{transform:scale(1)} }
+
+@keyframes dice-pop {
+  0% {
+    transform: scale(1);
+  }
+  30% {
+    transform: scale(1.06);
+  }
+  100% {
+    transform: scale(1);
+  }
+}
+
 @keyframes dice-wobble-elastic {
-  0%{transform:rotateZ(0)} 25%{transform:rotateZ(-5deg)}
-  55%{transform:rotateZ(3deg)} 75%{transform:rotateZ(-2deg)} 100%{transform:rotateZ(0)}
+  0% {
+    transform: rotateZ(0);
+  }
+  25% {
+    transform: rotateZ(-5deg);
+  }
+  55% {
+    transform: rotateZ(3deg);
+  }
+  75% {
+    transform: rotateZ(-2deg);
+  }
+  100% {
+    transform: rotateZ(0);
+  }
 }
 
-.spin-a.spinning .dice-cube { animation: dice-spin-a .65s cubic-bezier(.22,.75,.23,.99); }
-.spin-b.spinning .dice-cube { animation: dice-spin-b .65s cubic-bezier(.22,.75,.23,.99); }
-.spin-c.spinning .dice-cube { animation: dice-spin-c .65s cubic-bezier(.22,.75,.23,.99); }
+.spin-a.spinning .dice-cube {
+  animation: dice-spin-a 0.65s cubic-bezier(0.22, 0.75, 0.23, 0.99);
+}
 
-.spinning   { animation: dice-shadow-breathe .65s ease-in-out; }
-.finish-pop { animation: dice-pop .28s ease-out; }
-.wobble     { animation: dice-wobble-elastic .45s ease-out; }
+.spin-b.spinning .dice-cube {
+  animation: dice-spin-b 0.65s cubic-bezier(0.22, 0.75, 0.23, 0.99);
+}
+
+.spin-c.spinning .dice-cube {
+  animation: dice-spin-c 0.65s cubic-bezier(0.22, 0.75, 0.23, 0.99);
+}
+
+.spinning {
+  animation: dice-shadow-breathe 0.65s ease-in-out;
+}
+
+.finish-pop {
+  animation: dice-pop 0.28s ease-out;
+}
+
+.wobble {
+  animation: dice-wobble-elastic 0.45s ease-out;
+}
 
 /* Accesibilidad: reduced motion */
 @media (prefers-reduced-motion: reduce) {
-  .dice-cube { transition: none !important; }
-  .spinning, .finish-pop, .wobble { animation: none !important; }
+  .dice-cube {
+    transition: none !important;
+  }
+  .spinning,
+  .finish-pop,
+  .wobble {
+    animation: none !important;
+  }
 }
 
 /* ===================================
-   Cursor personalizado
+   CURSOR PERSONALIZADO
 =================================== */
-.cursor-dot, .cursor-ring {
-  position: fixed; top: 0; left: 0;
-  pointer-events: none; z-index: 60;
+.cursor-dot,
+.cursor-ring {
+  position: fixed;
+  top: 0;
+  left: 0;
+  pointer-events: none;
+  z-index: 60;
   transform: translate(-100px, -100px);
 }
+
 .cursor-dot {
-  width: 6px; height: 6px; border-radius: 9999px;
-  background: #10b981; box-shadow: 0 0 12px rgba(16,185,129,.6);
+  width: 6px;
+  height: 6px;
+  border-radius: 9999px;
+  background: #10b981;
+  box-shadow: 0 0 12px rgba(16, 185, 129, 0.6);
 }
+
 .dark .cursor-dot {
-  background: #22d3ee; box-shadow: 0 0 12px rgba(34,211,238,.6);
+  background: #22d3ee;
+  box-shadow: 0 0 12px rgba(34, 211, 238, 0.6);
 }
+
 .cursor-ring {
-  width: 28px; height: 28px; border-radius: 9999px;
-  border: 2px solid rgba(16,185,129,.7);
+  width: 28px;
+  height: 28px;
+  border-radius: 9999px;
+  border: 2px solid rgba(16, 185, 129, 0.7);
   backdrop-filter: blur(2px);
-  box-shadow: 0 0 24px rgba(16,185,129,.25);
-  transition: transform .1s ease-out, width .15s ease, height .15s ease;
+  box-shadow: 0 0 24px rgba(16, 185, 129, 0.25);
+  transition: transform 0.1s ease-out, width 0.15s ease, height 0.15s ease;
 }
+
 .dark .cursor-ring {
-  border-color: rgba(34,211,238,.7);
-  box-shadow: 0 0 24px rgba(34,211,238,.2);
+  border-color: rgba(34, 211, 238, 0.7);
+  box-shadow: 0 0 24px rgba(34, 211, 238, 0.2);
 }
-.cursor-none-global, .cursor-none-global body { cursor: none; }
-input, textarea, button, a, select { cursor: auto; }
+
+.cursor-none-global,
+.cursor-none-global body {
+  cursor: none;
+}
+
+input,
+textarea,
+button,
+a,
+select {
+  cursor: auto;
+}
 
 /* ===================================
-   Fondo animado (blobs)
+   FONDO ANIMADO (BLOBS)
 =================================== */
-.bgfx { position: absolute; inset: 0; overflow: hidden; z-index: 0; }
+.bgfx {
+  position: absolute;
+  inset: 0;
+  overflow: hidden;
+  z-index: 0;
+}
+
 .blob {
-  position: absolute; width: 45vmin; height: 45vmin; border-radius: 9999px;
-  filter: blur(40px) saturate(120%); opacity: .55;
-  mix-blend-mode: plus-lighter; will-change: transform;
+  position: absolute;
+  width: 45vmin;
+  height: 45vmin;
+  border-radius: 9999px;
+  filter: blur(40px) saturate(120%);
+  opacity: 0.55;
+  mix-blend-mode: plus-lighter;
+  will-change: transform;
 }
+
 .blob-1 {
-  background: radial-gradient(circle at 30% 30%, #A5D6A7 0%, rgba(165,214,167,0) 60%);
-  top: -10vmin; left: -8vmin; animation: blob-move-a 18s ease-in-out infinite;
+  background: radial-gradient(circle at 30% 30%, #a5d6a7 0%, rgba(165, 214, 167, 0) 60%);
+  top: -10vmin;
+  left: -8vmin;
+  animation: blob-move-a 18s ease-in-out infinite;
 }
+
 .blob-2 {
-  background: radial-gradient(circle at 70% 30%, #1E88E5 0%, rgba(30,136,229,0) 60%);
-  top: 10vmin; right: -12vmin; animation: blob-move-b 22s ease-in-out infinite;
+  background: radial-gradient(circle at 70% 30%, #1e88e5 0%, rgba(30, 136, 229, 0) 60%);
+  top: 10vmin;
+  right: -12vmin;
+  animation: blob-move-b 22s ease-in-out infinite;
 }
+
 .blob-3 {
-  background: radial-gradient(circle at 40% 60%, #E53935 0%, rgba(229,57,53,0) 60%);
-  bottom: -14vmin; left: 20vmin; animation: blob-move-c 26s ease-in-out infinite;
+  background: radial-gradient(circle at 40% 60%, #e53935 0%, rgba(229, 57, 53, 0) 60%);
+  bottom: -14vmin;
+  left: 20vmin;
+  animation: blob-move-c 26s ease-in-out infinite;
 }
-.dark .blob-1 { background: radial-gradient(circle at 30% 30%, #4ADE80 0%, rgba(74,222,128,0) 60%); }
-.dark .blob-2 { background: radial-gradient(circle at 70% 30%, #60A5FA 0%, rgba(96,165,250,0) 60%); }
-.dark .blob-3 { background: radial-gradient(circle at 40% 60%, #F87171 0%, rgba(248,113,113,0) 60%); }
+
+.dark .blob-1 {
+  background: radial-gradient(circle at 30% 30%, #4ade80 0%, rgba(74, 222, 128, 0) 60%);
+}
+
+.dark .blob-2 {
+  background: radial-gradient(circle at 70% 30%, #60a5fa 0%, rgba(96, 165, 250, 0) 60%);
+}
+
+.dark .blob-3 {
+  background: radial-gradient(circle at 40% 60%, #f87171 0%, rgba(248, 113, 113, 0) 60%);
+}
 
 @keyframes blob-move-a {
-  0% { transform: translate(0,0) scale(1); }
-  25% { transform: translate(8vmin,3vmin) scale(1.1); }
-  50% { transform: translate(2vmin,8vmin) scale(0.95); }
-  75% { transform: translate(-6vmin,4vmin) scale(1.08); }
-  100% { transform: translate(0,0) scale(1); }
+  0% {
+    transform: translate(0, 0) scale(1);
+  }
+  25% {
+    transform: translate(8vmin, 3vmin) scale(1.1);
+  }
+  50% {
+    transform: translate(2vmin, 8vmin) scale(0.95);
+  }
+  75% {
+    transform: translate(-6vmin, 4vmin) scale(1.08);
+  }
+  100% {
+    transform: translate(0, 0) scale(1);
+  }
 }
+
 @keyframes blob-move-b {
-  0% { transform: translate(0,0) scale(1.05); }
-  33% { transform: translate(-6vmin,6vmin) scale(0.98); }
-  66% { transform: translate(-2vmin,-4vmin) scale(1.08); }
-  100% { transform: translate(0,0) scale(1.05); }
+  0% {
+    transform: translate(0, 0) scale(1.05);
+  }
+  33% {
+    transform: translate(-6vmin, 6vmin) scale(0.98);
+  }
+  66% {
+    transform: translate(-2vmin, -4vmin) scale(1.08);
+  }
+  100% {
+    transform: translate(0, 0) scale(1.05);
+  }
 }
+
 @keyframes blob-move-c {
-  0% { transform: translate(0,0) scale(1); }
-  20% { transform: translate(6vmin,-3vmin) scale(1.12); }
-  60% { transform: translate(-4vmin,-6vmin) scale(0.9); }
-  100% { transform: translate(0,0) scale(1); }
+  0% {
+    transform: translate(0, 0) scale(1);
+  }
+  20% {
+    transform: translate(6vmin, -3vmin) scale(1.12);
+  }
+  60% {
+    transform: translate(-4vmin, -6vmin) scale(0.9);
+  }
+  100% {
+    transform: translate(0, 0) scale(1);
+  }
 }
 
 /* ===================================
-   Inputs / botones
+   INPUTS / BOTONES
 =================================== */
 .form-field {
   width: 100%;
   border-radius: 12px;
   padding: 0.75rem 1rem;
-  background-color: rgba(255,255,255,0.98);
+  background-color: rgba(255, 255, 255, 0.98);
   color: #0f172a;
   border: 2px solid #000;
-  box-shadow: inset 0 1px 2px rgba(0,0,0,0.05);
-  transition: border-color .2s ease, box-shadow .2s ease, background-color .2s ease;
+  box-shadow: inset 0 1px 2px rgba(0, 0, 0, 0.05);
+  transition: border-color 0.2s ease, box-shadow 0.2s ease,
+    background-color 0.2s ease;
 }
-.form-field::placeholder { color: #6b7280; }
+
+.form-field::placeholder {
+  color: #6b7280;
+}
+
 .form-field:focus {
   outline: none;
-  border-color: #3A8F60;
-  box-shadow: 0 0 0 3px rgba(58,143,96,0.25);
+  border-color: #3a8f60;
+  box-shadow: 0 0 0 3px rgba(58, 143, 96, 0.25);
   background-color: #fff;
 }
+
 .dark .form-field {
-  background-color: rgba(24,24,27,0.9);
+  background-color: rgba(24, 24, 27, 0.9);
   color: #e5e7eb;
   border: 2px solid #d1d5db;
-  box-shadow: inset 0 1px 2px rgba(0,0,0,0.25);
+  box-shadow: inset 0 1px 2px rgba(0, 0, 0, 0.25);
 }
+
 .dark .form-field:focus {
-  border-color: #60A5FA;
-  box-shadow: 0 0 0 3px rgba(96,165,250,0.25);
+  border-color: #60a5fa;
+  box-shadow: 0 0 0 3px rgba(96, 165, 250, 0.25);
 }
-textarea.form-field { min-height: 140px; resize: vertical; }
 
-.btn { @apply inline-flex items-center justify-center font-medium rounded-full transition; }
-.btn-solid { border: 1px solid transparent; }
-.btn-primary { @apply text-white; background-color: #ef4444; }
-.btn-primary:hover { background-color: #f87171; }
+textarea.form-field {
+  min-height: 140px;
+  resize: vertical;
+}
 
-/* Overlay About (legibilidad) */
+.btn {
+  @apply inline-flex items-center justify-center font-medium rounded-full transition;
+}
+
+.btn-solid {
+  border: 1px solid transparent;
+}
+
+.btn-primary {
+  @apply text-white;
+  background-color: #ef4444;
+}
+
+.btn-primary:hover {
+  background-color: #f87171;
+}
+
+/* ===================================
+   OVERLAY ABOUT (LEGIBILIDAD)
+=================================== */
 .about-overlay {
-  background:
-    radial-gradient(900px 480px at 40% 35%, rgba(255,255,255,0.65), transparent 55%),
-    radial-gradient(700px 420px at 80% 70%, rgba(255,255,255,0.40), transparent 60%);
-  opacity: .85;
+  background: radial-gradient(900px 480px at 40% 35%, rgba(255, 255, 255, 0.65), transparent 55%),
+    radial-gradient(700px 420px at 80% 70%, rgba(255, 255, 255, 0.4), transparent 60%);
+  opacity: 0.85;
 }
+
 .dark .about-overlay {
-  background:
-    radial-gradient(900px 480px at 40% 35%, rgba(255,255,255,0.14), transparent 55%),
-    radial-gradient(700px 420px at 80% 70%, rgba(255,255,255,0.10), transparent 60%);
+  background: radial-gradient(900px 480px at 40% 35%, rgba(255, 255, 255, 0.14), transparent 55%),
+    radial-gradient(700px 420px at 80% 70%, rgba(255, 255, 255, 0.1), transparent 60%);
   opacity: 1;
 }
 
-/* --- Felt del tablero (si usas la versión CSS) --- */
+/* ===================================
+   FELT DEL TABLERO (GRIS ELEGANTE)
+=================================== */
 .felt-board {
-  background:
-    radial-gradient(120% 120% at 30% 20%, rgba(255,255,255,.12), transparent 40%),
-    radial-gradient(100% 100% at 70% 80%, rgba(0,0,0,.25), transparent 40%),
-    #14532d;
+  background: radial-gradient(120% 120% at 30% 20%, rgba(255, 255, 255, 0.3), transparent 40%),
+    radial-gradient(100% 100% at 70% 80%, rgba(0, 0, 0, 0.12), transparent 40%),
+    #d3d7dc;
 }
 
-/* --- Camino/casillas con efecto emboss (opcional si usas SVG) --- */
+.dark .felt-board {
+  background: radial-gradient(120% 120% at 30% 20%, rgba(255, 255, 255, 0.04), transparent 40%),
+    radial-gradient(100% 100% at 70% 80%, rgba(0, 0, 0, 0.4), transparent 40%),
+    #1a2522;
+}
+
+/* ===================================
+   CAMINO/CASILLAS CON CONTRASTE
+=================================== */
 .parques-path {
-  background:
-    repeating-linear-gradient(
+  background: repeating-linear-gradient(
       to right,
-      rgba(255,255,255,0.06) 0px,
-      rgba(255,255,255,0.06) 1px,
-      rgba(0,0,0,0) 1px,
-      rgba(0,0,0,0) 18px
+      rgba(255, 255, 255, 0.2) 0px,
+      rgba(255, 255, 255, 0.2) 1px,
+      rgba(0, 0, 0, 0) 1px,
+      rgba(0, 0, 0, 0) 18px
     ),
     repeating-linear-gradient(
       to bottom,
-      rgba(255,255,255,0.05) 0px,
-      rgba(255,255,255,0.05) 1px,
-      rgba(0,0,0,0) 1px,
-      rgba(0,0,0,0) 18px
+      rgba(255, 255, 255, 0.15) 0px,
+      rgba(255, 255, 255, 0.15) 1px,
+      rgba(0, 0, 0, 0) 1px,
+      rgba(0, 0, 0, 0) 18px
     ),
-    radial-gradient(120% 100% at 50% 40%, rgba(255,255,255,.06), rgba(0,0,0,0) 60%),
-    rgba(21, 94, 59, 0.96);
-  box-shadow:
-    inset 0 2px 0 rgba(255,255,255,.10),
-    inset 0 -3px 8px rgba(0,0,0,.28);
-  border: 2px solid rgba(255,255,255,.18);
+    radial-gradient(120% 100% at 50% 40%, rgba(255, 255, 255, 0.2), rgba(0, 0, 0, 0) 60%),
+    rgba(200, 205, 212, 0.98);
+  box-shadow: inset 0 3px 0 rgba(255, 255, 255, 0.5),
+    inset 0 -4px 8px rgba(0, 0, 0, 0.2);
+  border: 3px solid rgba(120, 130, 145, 0.4);
 }
 
-/* --- Bisel de la roseta central (si usas versión CSS) --- */
+.dark .parques-path {
+  background: repeating-linear-gradient(
+      to right,
+      rgba(255, 255, 255, 0.03) 0px,
+      rgba(255, 255, 255, 0.03) 1px,
+      rgba(0, 0, 0, 0) 1px,
+      rgba(0, 0, 0, 0) 18px
+    ),
+    repeating-linear-gradient(
+      to bottom,
+      rgba(255, 255, 255, 0.02) 0px,
+      rgba(255, 255, 255, 0.02) 1px,
+      rgba(0, 0, 0, 0) 1px,
+      rgba(0, 0, 0, 0) 18px
+    ),
+    radial-gradient(120% 100% at 50% 40%, rgba(255, 255, 255, 0.03), rgba(0, 0, 0, 0) 60%),
+    rgba(26, 37, 34, 0.96);
+  box-shadow: inset 0 2px 0 rgba(255, 255, 255, 0.05),
+    inset 0 -3px 8px rgba(0, 0, 0, 0.4);
+  border: 2px solid rgba(255, 255, 255, 0.08);
+}
+
+/* ===================================
+   BISEL DE LA ROSETA CENTRAL
+=================================== */
 .rosetta-bevel {
-  box-shadow:
-    inset 0 6px 10px rgba(255,255,255,.18),
-    inset 0 -10px 18px rgba(0,0,0,.28),
-    0 10px 26px rgba(0,0,0,.45);
+  box-shadow: inset 0 6px 10px rgba(255, 255, 255, 0.4),
+    inset 0 -10px 18px rgba(0, 0, 0, 0.2),
+    0 10px 26px rgba(0, 0, 0, 0.25);
 }
 
-/* Tokens flotando */
-@keyframes float-slow {
-  0%   { transform: translateY(0) rotate(0deg); }
-  50%  { transform: translateY(-6px) rotate(2deg); }
-  100% { transform: translateY(0) rotate(0deg); }
+.dark .rosetta-bevel {
+  box-shadow: inset 0 4px 8px rgba(255, 255, 255, 0.08),
+    inset 0 -8px 16px rgba(0, 0, 0, 0.5),
+    0 10px 26px rgba(0, 0, 0, 0.6);
 }
-.token-float { animation: float-slow 5s ease-in-out infinite; }
+
+/* ===================================
+   TOKENS FLOTANDO
+=================================== */
+@keyframes float-slow {
+  0% {
+    transform: translateY(0) rotate(0deg);
+  }
+  50% {
+    transform: translateY(-6px) rotate(2deg);
+  }
+  100% {
+    transform: translateY(0) rotate(0deg);
+  }
+}
+
+.token-float {
+  animation: float-slow 5s ease-in-out infinite;
+}
+
+/* ===================================
+   SHADOW SOFT
+=================================== */
+.shadow-soft {
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+}
+
+.dark .shadow-soft {
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+}

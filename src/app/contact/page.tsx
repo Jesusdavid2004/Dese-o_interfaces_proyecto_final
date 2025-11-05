@@ -1,10 +1,10 @@
-import SiteNav from "@/components/SiteNav"
+
 import { Github, Phone } from "lucide-react"
 
 export default function ContactPage() {
   return (
     <main className="mx-auto max-w-6xl px-4 pb-24">
-      <SiteNav />
+
 
       <section className="mt-8">
         <div className="flex items-center gap-2 mb-6">

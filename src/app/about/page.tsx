@@ -1,10 +1,9 @@
 import Image from "next/image"
-import SiteNav from "@/components/SiteNav"
 
 export default function AboutPage() {
   return (
     <main className="mx-auto max-w-6xl px-4 pb-12">
-      <SiteNav />
+      {/* ✅ ELIMINADO: <SiteNav /> */}
 
       <section className="mt-6">
         <div className="relative rounded-3xl shadow-soft border border-black/5 overflow-hidden">
