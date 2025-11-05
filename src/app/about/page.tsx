@@ -18,7 +18,7 @@ export default function AboutPage() {
             {/* Encabezado */}
             <div className="text-center">
               <h1 className="text-2xl md:text-4xl font-extrabold text-gray-900 dark:text-white">
-                <span className="mr-2">🎯</span>
+                <span className="mr-2"></span>
                 Hola, soy Jesús David Villota Arteaga
               </h1>
               <div className="mt-1 text-xl font-bold text-gray-800 dark:text-gray-100">

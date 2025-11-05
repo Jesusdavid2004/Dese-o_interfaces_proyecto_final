@@ -6,7 +6,7 @@ html {
 
 html.light {
   background-color: #f9fafb !important;
-  color: #111827 !important;
+  color: #1f293d !important;
 }
 
 @import url("https://fonts.googleapis.com/css2?family=Geist:wght@400;500;600;700&family=Syne:wght@400;500;600;700;800&display=swap");
@@ -153,9 +153,9 @@ input, textarea, select, form {
 .board-bg {
   background: radial-gradient(
     ellipse at center, 
-    #e6e8eb 0%,
-    #d4d8dd 40%,
-    #c0c5cc 100%
+    #97b3dc 0%,
+    #73aee9 40%,
+    #6e7175 100%
   );
   box-shadow: 0 25px 70px rgba(0, 0, 0, 0.18);
 }
@@ -164,8 +164,8 @@ input, textarea, select, form {
   background: radial-gradient(
     ellipse at center, 
     #2d3e3a 0%, 
-    #1a2522 60%,
-    #0f1613 100%
+    #101816 60%,
+    #273d34 100%
   );
 }
 
@@ -358,7 +358,7 @@ input, textarea, select, form {
 .circle-red {
   width: clamp(100px, 20vw, 220px);
   height: clamp(100px, 20vw, 220px);
-  background: radial-gradient(circle at 35% 35%, #991b1b 0%, #7f1d1d 40%, rgba(127, 29, 29, 0) 100%);
+  background: radial-gradient(circle at 35% 35%, #956262 0%, #c26e6e 40%, rgba(127, 29, 29, 0) 100%);
   top: clamp(10px, 5vh, 50px);
   left: clamp(10px, 3vw, 40px);
   box-shadow: 0 0 80px rgba(153, 27, 27, 0.15);
@@ -373,7 +373,7 @@ input, textarea, select, form {
 .circle-blue {
   width: clamp(120px, 22vw, 250px);
   height: clamp(120px, 22vw, 250px);
-  background: radial-gradient(circle at 35% 35%, #1e40af 0%, #1e3a8a 40%, rgba(30, 58, 138, 0) 100%);
+  background: radial-gradient(circle at 35% 35%, #384d91 0%, #1e3a8a 40%, rgba(30, 58, 138, 0) 100%);
   top: clamp(10px, 4vh, 45px);
   right: clamp(10px, 3vw, 40px);
   box-shadow: 0 0 80px rgba(37, 99, 235, 0.15);
