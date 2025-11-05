@@ -19,7 +19,10 @@ export function Providers({ children }: { children: ReactNode }) {
       {!mounted && <OverlayLoader />}
       <BackgroundFX />
       <CursorFX />
-      <SiteNav />
+      
+      {/* ✅ SiteNav DENTRO del ThemeProvider - IMPORTANTE */}
+      {mounted && <SiteNav />}
+      
       <main className="relative z-10 w-full flex-1 overflow-y-auto">
         {children}
       </main>

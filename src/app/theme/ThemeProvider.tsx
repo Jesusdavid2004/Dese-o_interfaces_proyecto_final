@@ -18,7 +18,7 @@ type Ctx = {
   toggle: () => void;
 };
 
-const ThemeCtx = createContext<Ctx | null>(null);
+const ThemeCtx = createContext<Ctx | undefined>(undefined);
 
 function getSystemPrefersDark(): boolean {
   if (typeof window === "undefined") return false;
