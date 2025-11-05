@@ -16,6 +16,26 @@ html.light {
 @tailwind utilities;
 
 /* ===================================
+   META VIEWPORT - RESPONSIVE
+=================================== */
+@viewport {
+  width: device-width;
+  initial-scale: 1;
+  maximum-scale: 5;
+  user-scalable: yes;
+}
+
+* {
+  -webkit-tap-highlight-color: transparent;
+  -webkit-touch-callout: none;
+}
+
+html {
+  -webkit-text-size-adjust: 100%;
+  -ms-text-size-adjust: 100%;
+}
+
+/* ===================================
    TIPOGRAFÍA ELEGANTE
 =================================== */
 html {
