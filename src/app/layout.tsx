@@ -5,9 +5,6 @@ import { Providers } from "./providers";
 export const metadata: Metadata = {
   title: "Jesús David Villota Arteaga — Portafolio",
   description: "Portafolio con Parqués interactivo, animaciones y modo oscuro",
-  icons: {
-    icon: "🎲",
-  },
 };
 
 export const viewport: Viewport = {
@@ -51,7 +48,7 @@ export default function RootLayout({
           }}
         />
       </head>
-      <body className="min-h-dvh w-screen bg-white dark:bg-gray-900 text-gray-900 dark:text-gray-100 transition-colors duration-300 overflow-x-hidden">
+      <body className="min-h-dvh w-full bg-white dark:bg-gray-900 text-gray-900 dark:text-gray-100 transition-colors duration-300 overflow-x-hidden">
         <Providers>
           {children}
         </Providers>
