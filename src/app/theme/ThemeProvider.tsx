@@ -90,6 +90,7 @@ export function ThemeProvider({
 
     const mql = window.matchMedia("(prefers-color-scheme: dark)");
 
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const handler = (): void => {
       applyThemeToDocument(mql.matches ? "dark" : "light", attribute);
     };
@@ -98,6 +99,7 @@ export function ThemeProvider({
       mql.addEventListener("change", handler);
     } catch {
       try {
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
         (mql as any).addListener(handler);
       } catch {
         // Fallback
@@ -109,6 +111,7 @@ export function ThemeProvider({
         mql.removeEventListener("change", handler);
       } catch {
         try {
+          // eslint-disable-next-line @typescript-eslint/no-explicit-any
           (mql as any).removeListener(handler);
         } catch {
           // Fallback

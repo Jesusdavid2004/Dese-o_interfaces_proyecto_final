@@ -92,13 +92,6 @@ const LAST_SAFE_BEFORE_HOME: Record<ColorKey, number> = {
   yellow: 39
 };
 
-const HOME_ENTRY: Record<ColorKey, number> = {
-  red: 68,
-  blue: 26,
-  green: 54,
-  yellow: 40
-};
-
 const SAFE_CELLS = new Set([15, 25, 29, 39, 43, 53, 57, 67]);
 
 // ==================== FUNCIONES DE MOVIMIENTO ====================
@@ -565,7 +558,6 @@ export default function ParquesColombia() {
   );
 }
 
-// ✨ COMPONENTE DICE MEJORADO CON MEJOR CONTRASTE
 function DiceContainer({ 
   value, 
   used,
@@ -581,6 +573,11 @@ function DiceContainer({
   disabled?: boolean;
   waitingForFirst?: boolean;
 }) {
+  const diceSize: React.CSSProperties = {
+    "--dice-size": "100px",
+    perspective: "1000px"
+  } as React.CSSProperties;
+
   return (
     <div className="flex flex-col items-center gap-2">
       <p className="text-xs text-gray-600 dark:text-gray-300 font-semibold uppercase tracking-wide">{label}</p>
@@ -588,18 +585,9 @@ function DiceContainer({
         className={`relative w-28 h-28 rounded-xl shadow-lg flex items-center justify-center transition-all duration-300 ${
           used ? 'opacity-40' : 'opacity-100'
         } bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700`}
-        style={{
-          perspective: '1000px'
-        }}
       >
         {value === 0 ? (
-          <div 
-            style={{ 
-              "--dice-size": "100px",
-              perspective: '1000px'
-            } as React.CSSProperties}
-            className="animate-pulse"
-          >
+          <div style={diceSize} className="animate-pulse">
             <Dice3D onRoll={onRoll} size={100} disabled={disabled} />
           </div>
         ) : (
@@ -631,17 +619,19 @@ function DiceFace({ value }: { value: number }) {
   );
 }
 
+interface BoardSVGProps {
+  players: Player[];
+  currentColor: ColorKey;
+  onTokenClick: (idx: number) => void;
+  gamePhase: GamePhase;
+}
+
 function BoardSVG({
   players,
   currentColor,
   onTokenClick,
   gamePhase,
-}: {
-  players: Player[];
-  currentColor: ColorKey;
-  onTokenClick: (idx: number) => void;
-  gamePhase: GamePhase;
-}) {
+}: BoardSVGProps) {
   const size = 850;
   const cell = 56;
 
@@ -711,7 +701,7 @@ function BoardSVG({
             fill={COLORS.blue.hex} stroke="#000" strokeWidth="4" rx="16" />
 
       {Object.entries(BOARD_MAP).map(([pos, [x, y]]) => {
-        const cellPos = parseInt(pos);
+        const cellPos = parseInt(pos, 10);
         const fill = BOARD_COLORS[cellPos] || "#e8d4a0";
         
         return (
@@ -729,13 +719,13 @@ function BoardSVG({
       })}
 
       {Object.entries(FINAL_MAP).map(([pos, [x, y]]) => {
-        const cellPos = parseInt(pos);
+        const cellPos = parseInt(pos, 10);
         let fill = "#fff";
         
-        if (FINAL_PATHS.red.includes(cellPos)) fill = COLORS.red.hex + "99";
-        else if (FINAL_PATHS.blue.includes(cellPos)) fill = COLORS.blue.hex + "99";
-        else if (FINAL_PATHS.green.includes(cellPos)) fill = COLORS.green.hex + "99";
-        else if (FINAL_PATHS.yellow.includes(cellPos)) fill = COLORS.yellow.hex + "99";
+        if (FINAL_PATHS.red.includes(cellPos)) fill = `${COLORS.red.hex}99`;
+        else if (FINAL_PATHS.blue.includes(cellPos)) fill = `${COLORS.blue.hex}99`;
+        else if (FINAL_PATHS.green.includes(cellPos)) fill = `${COLORS.green.hex}99`;
+        else if (FINAL_PATHS.yellow.includes(cellPos)) fill = `${COLORS.yellow.hex}99`;
         
         return (
           <rect
