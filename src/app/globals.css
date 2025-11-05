@@ -1,7 +1,12 @@
-/* ✅ Fondos por defecto - oscuro primero */
+/* ✅ Fondos por defecto */
 html {
   background-color: #111827 !important;
   color: #f3f4f6 !important;
+  scrollbar-width: none; /* Firefox */
+}
+
+html::-webkit-scrollbar {
+  display: none; /* Chrome, Safari, Edge */
 }
 
 html.light {
@@ -110,26 +115,6 @@ input, textarea, select, form {
   max-width: 100%;
   width: 100%;
   box-sizing: border-box;
-}
-
-/* ===================================
-   SCROLL BAR STYLING
-=================================== */
-::-webkit-scrollbar {
-  width: 8px;
-}
-
-::-webkit-scrollbar-track {
-  background: transparent;
-}
-
-::-webkit-scrollbar-thumb {
-  background: rgba(100, 100, 100, 0.5);
-  border-radius: 4px;
-}
-
-::-webkit-scrollbar-thumb:hover {
-  background: rgba(100, 100, 100, 0.8);
 }
 
 /* ===================================
@@ -354,7 +339,7 @@ input, textarea, select, form {
   opacity: 0.25;
 }
 
-/* Círculo Rojo - Arriba a la izquierda */
+/* Círculo Rojo */
 .circle-red {
   width: clamp(100px, 20vw, 220px);
   height: clamp(100px, 20vw, 220px);
@@ -369,7 +354,7 @@ input, textarea, select, form {
   box-shadow: 0 0 80px rgba(220, 38, 38, 0.2);
 }
 
-/* Círculo Azul - Arriba a la derecha */
+/* Círculo Azul */
 .circle-blue {
   width: clamp(120px, 22vw, 250px);
   height: clamp(120px, 22vw, 250px);
@@ -384,7 +369,7 @@ input, textarea, select, form {
   box-shadow: 0 0 80px rgba(59, 130, 246, 0.2);
 }
 
-/* Círculo Amarillo - Abajo a la izquierda */
+/* Círculo Amarillo */
 .circle-yellow {
   width: clamp(110px, 21vw, 230px);
   height: clamp(110px, 21vw, 230px);
@@ -399,7 +384,7 @@ input, textarea, select, form {
   box-shadow: 0 0 80px rgba(251, 146, 60, 0.2);
 }
 
-/* Círculo Verde - Abajo a la derecha */
+/* Círculo Verde */
 .circle-green {
   width: clamp(110px, 21vw, 230px);
   height: clamp(110px, 21vw, 230px);
@@ -414,7 +399,6 @@ input, textarea, select, form {
   box-shadow: 0 0 80px rgba(74, 222, 128, 0.2);
 }
 
-/* Responsive - Ajustes para tablet */
 @media (max-width: 1024px) {
   .circle-red {
     width: clamp(85px, 18vw, 180px);
@@ -437,7 +421,6 @@ input, textarea, select, form {
   }
 }
 
-/* Responsive - Ajustes para móvil */
 @media (max-width: 768px) {
   .circle-deco {
     filter: blur(50px);
@@ -493,7 +476,6 @@ input, textarea, select, form {
   }
 }
 
-/* Responsive - Móvil pequeño */
 @media (max-width: 640px) {
   .circle-deco {
     filter: blur(45px);

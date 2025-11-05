@@ -6,12 +6,12 @@ import Dice3D from "../components/Dice3D";
 import TokenDecor from "../components/TokenDecor";
 
 const ROUTES: Record<number, string> = {
-  1: "/about",        // Cara 1
-  2: "/projects",     // Cara 2
-  3: "/services",     // Cara 3 ✅ INTERCAMBIADO
-  4: "/experience",   // Cara 4 ✅ INTERCAMBIADO
-  5: "/hobbies",      // Cara 5
-  6: "/contact",      // Cara 6
+  1: "/about",
+  2: "/projects",
+  3: "/services",
+  4: "/experience",
+  5: "/hobbies",
+  6: "/contact",
 };
 
 export default function Page() {
@@ -29,32 +29,16 @@ export default function Page() {
         {/* Mesa verde de fondo */}
         <div className="absolute inset-0 board-bg opacity-60 rounded-3xl" />
 
-        {/* Tokens decorativos en esquinas */}
-        <TokenDecor 
-          color="red" 
-          size={60} 
-          className="absolute top-6 left-6 token-float hidden sm:block" 
-        />
-        <TokenDecor 
-          color="blue" 
-          size={72} 
-          className="absolute top-8 right-10 token-float hidden sm:block" 
-        />
-        <TokenDecor 
-          color="yellow" 
-          size={54} 
-          className="absolute bottom-8 left-10 token-float hidden md:block" 
-        />
-        <TokenDecor 
-          color="green" 
-          size={64} 
-          className="absolute bottom-6 right-6 token-float hidden md:block" 
-        />
+        {/* Tokens decorativos */}
+        <TokenDecor color="red" size={60} className="absolute top-6 left-6 token-float hidden sm:block" />
+        <TokenDecor color="blue" size={72} className="absolute top-8 right-10 token-float hidden sm:block" />
+        <TokenDecor color="yellow" size={54} className="absolute bottom-8 left-10 token-float hidden md:block" />
+        <TokenDecor color="green" size={64} className="absolute bottom-6 right-6 token-float hidden md:block" />
 
         {/* Contenido principal */}
         <div className="relative z-10 max-w-2xl mx-auto w-full">
           <h1 className="text-3xl sm:text-4xl md:text-5xl font-display font-bold text-white mb-2 sm:mb-4">
-            🎲 Lanza el dado y explora mi portafolio
+             Lanza el dado y explora mi portafolio
           </h1>
           
           <p className="text-white/80 sm:text-white/90 text-sm sm:text-base md:text-lg mb-8 sm:mb-10">
@@ -73,7 +57,7 @@ export default function Page() {
                 1: Acerca de mí · 2: Proyectos · 3: Servicios · 4: Experiencia · 5: Pasatiempos · 6: Contacto
               </span>
               <span className="sm:hidden">
-                1: Mí · 2: Proyectos · 3: Serv. · 4: Exp. · 5: Pasatiempos · 6: Contacto
+                1: Mí · 2: Proy. · 3: Serv. · 4: Exp. · 5: Pasatiempos · 6: Contacto
               </span>
             </p>
           </div>
