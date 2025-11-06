@@ -1,8 +1,13 @@
 "use client";
 import React from "react";
 import { Github, Linkedin, Mail, Phone } from "lucide-react";
+import { getLangFromSearch, t, Lang } from "@/lib/i18n";
 
 export default function ContactPage() {
+  const lang: Lang = getLangFromSearch(
+    typeof window !== "undefined" ? window.location.search : ""
+  );
+
   return (
     <main className="relative mx-auto max-w-6xl px-4 md:px-6 pb-24">
       <BackdropAura />
@@ -11,17 +16,17 @@ export default function ContactPage() {
         <header className="flex items-center gap-2 mb-4">
           <Phone className="h-6 w-6 text-emerald-500" />
           <h2 className="text-3xl font-extrabold text-slate-900 dark:text-white">
-            Contáctame
+            {t(lang, "contact_title")}
           </h2>
         </header>
 
         <p className="mb-6 text-slate-700 dark:text-slate-300">
-          ¿Quieres hablar conmigo? Estoy disponible para proyectos, colaboraciones y nuevas oportunidades.
+          {t(lang, "contact_intro")}
         </p>
 
         <div className="mx-auto max-w-3xl">
-          <ContactForm />
-          <SocialRow />
+          <ContactForm lang={lang} />
+          <SocialRow lang={lang} />
         </div>
       </section>
 
@@ -53,7 +58,7 @@ function BackdropAura() {
 }
 
 /* ----------------- Formulario premium con alto contraste ----------------- */
-function ContactForm() {
+function ContactForm({ lang }: { lang: Lang }) {
   return (
     <form
       id="form"
@@ -61,31 +66,31 @@ function ContactForm() {
                  dark:border-white/10 dark:bg-white/5 dark:shadow-[0_20px_60px_-20px_rgba(2,6,23,.35)] backdrop-blur-xl"
     >
       <div className="grid gap-2">
-        <Label>Nombre</Label>
-        <Input name="name" autoComplete="name" placeholder="Tu nombre" />
+        <Label>{t(lang, "name")}</Label>
+        <Input name="name" autoComplete="name" placeholder={t(lang, "name_ph")} />
       </div>
 
       <div className="grid gap-2">
-        <Label>Email</Label>
-        <Input type="email" name="email" autoComplete="email" placeholder="tunombre@correo.com" />
+        <Label>{t(lang, "email")}</Label>
+        <Input type="email" name="email" autoComplete="email" placeholder={t(lang, "email_ph")} />
       </div>
 
       <div className="grid gap-2">
-        <Label>Mensaje</Label>
-        <TextArea name="message" rows={5} placeholder="Cuéntame sobre tu proyecto…" />
+        <Label>{t(lang, "message")}</Label>
+        <TextArea name="message" rows={5} placeholder={t(lang, "message_ph")} />
       </div>
 
-      <GradientButton type="submit">Enviar</GradientButton>
+      <GradientButton type="submit">{t(lang, "send")}</GradientButton>
     </form>
   );
 }
 
-function SocialRow() {
+function SocialRow({ lang }: { lang: Lang }) {
   return (
     <div className="mt-6 flex items-center justify-center gap-5">
-      <IconCrystal label="GitHub" href="https://github.com/tu-usuario" Icon={Github} />
-      <IconCrystal label="LinkedIn" href="https://www.linkedin.com/in/tu-usuario" Icon={Linkedin} />
-      <IconCrystal label="Email" href="mailto:tu@email.com" Icon={Mail} />
+      <IconCrystal label={t(lang, "github")} href="https://github.com/tu-usuario" Icon={Github} />
+      <IconCrystal label={t(lang, "linkedin")} href="https://www.linkedin.com/in/tu-usuario" Icon={Linkedin} />
+      <IconCrystal label={t(lang, "mail")} href="mailto:tu@email.com" Icon={Mail} />
     </div>
   );
 }

@@ -2,6 +2,8 @@
 
 import { useState } from "react";
 import Dice3D from "@/components/Dice3D";
+import { useSearchParams } from "next/navigation";
+import type { Lang } from "@/lib/i18n";
 
 type ColorKey = "red" | "blue" | "green" | "yellow";
 type Token = { pos: number; id: string };
@@ -25,19 +27,15 @@ const COLORS: Record<ColorKey, { hex: string; label: string }> = {
 const BOARD_MAP: Record<number, [number, number]> = {
   5: [9, 6], 6: [10, 6], 7: [11, 6], 8: [12, 6], 9: [13, 6], 10: [14, 6],
   11: [14, 7], 12: [14, 8],
-  
   13: [13, 8], 14: [12, 8], 15: [11, 8], 16: [10, 8], 17: [9, 8], 18: [8, 8],
   19: [8, 9], 20: [8, 10], 21: [8, 11], 22: [8, 12], 23: [8, 13], 24: [8, 14],
   25: [7, 14], 26: [6, 14],
-  
   27: [6, 13], 28: [6, 12], 29: [6, 11], 30: [6, 10], 31: [6, 9], 32: [6, 8],
   33: [5, 8], 34: [4, 8], 35: [3, 8], 36: [2, 8], 37: [1, 8], 38: [0, 8],
   39: [0, 7], 40: [0, 6],
-  
   41: [1, 6], 42: [2, 6], 43: [3, 6], 44: [4, 6], 45: [5, 6], 46: [6, 6],
   47: [6, 5], 48: [6, 4], 49: [6, 3], 50: [6, 2], 51: [6, 1], 52: [6, 0],
   53: [7, 0], 54: [8, 0],
-  
   55: [8, 1], 56: [8, 2], 57: [8, 3], 58: [8, 4], 59: [8, 5], 60: [8, 6],
   61: [9, 6], 62: [10, 6], 63: [11, 6], 64: [12, 6], 65: [13, 6], 66: [14, 6],
   67: [14, 7], 68: [14, 8],
@@ -70,13 +68,10 @@ const FINAL_PATHS: Record<ColorKey, number[]> = {
 const FINAL_MAP: Record<number, [number, number]> = {
   100: [13, 7], 101: [12, 7], 102: [11, 7], 103: [10, 7], 
   104: [9, 7], 105: [8, 7], 106: [7, 7], 107: [7, 7],
-  
   110: [7, 13], 111: [7, 12], 112: [7, 11], 113: [7, 10],
   114: [7, 9], 115: [7, 8], 116: [7, 7], 117: [7, 7],
-  
   120: [1, 7], 121: [2, 7], 122: [3, 7], 123: [4, 7],
   124: [5, 7], 125: [6, 7], 126: [7, 7], 127: [7, 7],
-  
   130: [7, 1], 131: [7, 2], 132: [7, 3], 133: [7, 4],
   134: [7, 5], 135: [7, 6], 136: [7, 7], 137: [7, 7],
 };
@@ -107,31 +102,21 @@ function calculateNewPosition(
   if (currentPos >= 100) {
     const finalPath = FINAL_PATHS[color];
     const currentIdx = finalPath.indexOf(currentPos);
-    
     if (currentIdx === -1) return currentPos;
-    
     const newIdx = currentIdx + steps;
-    
-    if (newIdx >= finalPath.length - 1) {
-      return 999;
-    }
-    
+    if (newIdx >= finalPath.length - 1) return 999;
     return finalPath[newIdx];
   }
 
   if (currentPos >= 5 && currentPos <= 68) {
     let newPos = currentPos - steps;
-    
-    if (newPos < 5) {
-      newPos = 68 - (5 - newPos - 1);
-    }
+    if (newPos < 5) newPos = 68 - (5 - newPos - 1);
 
     const lastSafe = LAST_SAFE_BEFORE_HOME[color];
 
     if (currentPos > lastSafe && newPos <= lastSafe) {
       const stepsAfterLastSafe = lastSafe - newPos;
       const finalPath = FINAL_PATHS[color];
-      
       return finalPath[stepsAfterLastSafe] || finalPath[0];
     }
 
@@ -149,10 +134,8 @@ function checkCapture(
   if (SAFE_CELLS.has(newPos) || newPos >= 100 || newPos === 999) {
     return { captured: false };
   }
-
   for (const player of players) {
     if (player.color === capturingColor) continue;
-    
     for (const token of player.tokens) {
       if (token.pos === newPos && token.pos !== -1) {
         return { 
@@ -163,7 +146,6 @@ function checkCapture(
       }
     }
   }
-
   return { captured: false };
 }
 
@@ -176,19 +158,58 @@ function canReachHome(
     const finalPath = FINAL_PATHS[color];
     const currentIdx = finalPath.indexOf(currentPos);
     const newIdx = currentIdx + steps;
-    
     return newIdx < finalPath.length;
   }
-
   return true;
 }
 
 export default function ParquesColombia() {
+  const sp = useSearchParams();
+  const lang = ((sp?.get("lang") || "es").toLowerCase() === "en" ? "en" : "es") as "es" | "en";
+
+  // i18n helper
+  const L = {
+    order: lang === "en" ? "Order" : "Orden",
+    orderHint: lang === "en" ? "Determine order: Each player rolls the dice" : "Determinar orden: Cada jugador lanza los dados",
+    begins: lang === "en" ? "starts → Roll for PAIRS" : "comienza → Lanza para PARES",
+    pointsNext: lang === "en" ? "pts → Next" : "pts → Siguiente",
+    pairs: lang === "en" ? "PAIRS" : "PARES",
+    takeOut: lang === "en" ? "Take a token out" : "Saca ficha",
+    noPairs: lang === "en" ? "No pairs." : "Sin pares.",
+    attemptsLeft: (n: number) => lang === "en" ? `${n} attempts left` : `${n} intentos restantes`,
+    threeNoPairs: lang === "en" ? "3 tries without pairs. Turn passes." : "3 intentos sin pares. Pasa turno.",
+    moveTokens: lang === "en" ? "Move tokens" : "Mueve fichas",
+    rollAgainPairs: lang === "en" ? "Pairs! Roll again" : "¡Pares! Tira de nuevo",
+    exitOnlyPairs: lang === "en" ? "You only exit with pairs" : "Solo sales con pares",
+    mustBeExact: lang === "en" ? "You must land exactly on the goal" : "Debes caer exacto en la meta",
+    noMove: lang === "en" ? "No possible move" : "No hay movimiento posible",
+    captured: lang === "en" ? "captured" : "capturó a",
+    goal: lang === "en" ? "Goal!" : "¡Meta!",
+    progress: (n: number) => `${n}/4`,
+    winner: lang === "en" ? "WON!" : "GANÓ!",
+    newGame: lang === "en" ? "New game" : "Nueva partida",
+    turn: lang === "en" ? "Turn" : "Turno",
+    goalShort: lang === "en" ? "Goal" : "Meta",
+    attemptsShort: lang === "en" ? "tries" : "intentos",
+    waiting: lang === "en" ? "Waiting..." : "Esperando...",
+    roll: lang === "en" ? "Roll" : "Lanza",
+    die1: lang === "en" ? "Die 1" : "Dado 1",
+    die2: lang === "en" ? "Die 2" : "Dado 2",
+    start: lang === "en" ? "START" : "SALIDA",
+    orderBadge: "🎲",
+    orderLabel: (c: string) => lang === "en" ? `Order: ${c} starts → Roll for PAIRS` : `🎮 Orden: ${c} comienza → Lanza para PARES`,
+    sumLabel: (c: string, sum: number) => lang === "en" ? `${c}: ${sum} pts → Next` : `🔢 ${c}: ${sum} pts → Siguiente`,
+    pairsMsg: (d1: number, d2: number) => lang === "en" ? `✨ PAIRS! ${d1} = ${d2} → ${L.takeOut}` : `✨ ¡PARES! ${d1} = ${d2} → ${L.takeOut}`,
+    pairsAgain: lang === "en" ? "✨ PAIRS! Move and roll again" : "✨ ¡PARES! Mueve y tira de nuevo",
+    sumMove: (a: number, b: number) => lang === "en" ? `🎯 ${a} + ${b} = ${L.moveTokens}` : `🎯 ${a} + ${b} = ${L.moveTokens}`,
+    wonBanner: (name: string) => lang === "en" ? `🏆 ${name} WON! 🏆` : `🏆 ${name} GANÓ! 🏆`,
+  };
+
   const [gamePhase, setGamePhase] = useState<GamePhase>("order");
   const [players, setPlayers] = useState<Player[]>([
     { 
       color: "red", 
-      name: "Jugador 1",
+      name: lang === "en" ? "Player 1" : "Jugador 1",
       tokens: [
         { pos: -1, id: "r1" }, 
         { pos: -1, id: "r2" },
@@ -200,7 +221,7 @@ export default function ParquesColombia() {
     },
     { 
       color: "green", 
-      name: "Jugador 2",
+      name: lang === "en" ? "Player 2" : "Jugador 2",
       tokens: [
         { pos: -1, id: "g1" }, 
         { pos: -1, id: "g2" },
@@ -212,7 +233,7 @@ export default function ParquesColombia() {
     },
     { 
       color: "yellow", 
-      name: "Jugador 3",
+      name: lang === "en" ? "Player 3" : "Jugador 3",
       tokens: [
         { pos: -1, id: "y1" }, 
         { pos: -1, id: "y2" },
@@ -224,7 +245,7 @@ export default function ParquesColombia() {
     },
     { 
       color: "blue", 
-      name: "Jugador 4",
+      name: lang === "en" ? "Player 4" : "Jugador 4",
       tokens: [
         { pos: -1, id: "b1" }, 
         { pos: -1, id: "b2" },
@@ -242,7 +263,7 @@ export default function ParquesColombia() {
   const [dice2, setDice2] = useState<number>(0);
   const [usedDice, setUsedDice] = useState<[boolean, boolean]>([false, false]);
   const [diceRolled, setDiceRolled] = useState(false);
-  const [hint, setHint] = useState("Determinar orden: Cada jugador lanza los dados");
+  const [hint, setHint] = useState(L.orderHint);
   const [orderRolls, setOrderRolls] = useState<{ color: ColorKey; sum: number }[]>([]);
   const [winner, setWinner] = useState<string | null>(null);
   const [pairAttempts, setPairAttempts] = useState(0);
@@ -252,7 +273,6 @@ export default function ParquesColombia() {
 
   function handleOrderRoll(value: number) {
     if (gamePhase !== "order" || diceRolled) return;
-    
     setDice1(value);
     const d2 = Math.floor(Math.random() * 6) + 1;
     setDice2(d2);
@@ -260,7 +280,6 @@ export default function ParquesColombia() {
 
     const sum = value + d2;
     const playerColor = ["red", "green", "yellow", "blue"][orderRolls.length] as ColorKey;
-    
     const newRolls = [...orderRolls, { color: playerColor, sum }];
     setOrderRolls(newRolls);
 
@@ -269,15 +288,14 @@ export default function ParquesColombia() {
       const order = sorted.map(r => r.color);
       setPlayerOrder(order);
       setGamePhase("playing");
-      setHint(`🎮 Orden: ${COLORS[order[0]].label} comienza → Lanza para PARES`);
-      
+      setHint(L.orderLabel(COLORS[order[0]].label));
       setTimeout(() => {
         setDice1(0);
         setDice2(0);
         setDiceRolled(false);
       }, 2000);
     } else {
-      setHint(`🔢 ${COLORS[playerColor].label}: ${sum} pts → Siguiente`);
+      setHint(L.sumLabel(COLORS[playerColor].label, sum));
       setTimeout(() => {
         setDice1(0);
         setDice2(0);
@@ -308,17 +326,16 @@ export default function ParquesColombia() {
     
     if (allInJail) {
       if (isPair) {
-        setHint(`✨ ¡PARES! ${dice1} = ${value} → Saca ficha`);
+        setHint(L.pairsMsg(dice1, value));
         setPairAttempts(0);
       } else {
         const newAttempts = pairAttempts + 1;
         setPairAttempts(newAttempts);
-        
         if (newAttempts >= 3) {
-          setHint(`❌ 3 intentos sin pares. Pasa turno.`);
+          setHint(`❌ ${L.threeNoPairs}`);
           setTimeout(() => passTurn(), 2000);
         } else {
-          setHint(`📍 Sin pares. ${3 - newAttempts} intentos restantes`);
+          setHint(`📍 ${L.noPairs} ${L.attemptsLeft(3 - newAttempts)}`);
           setTimeout(() => {
             setDice1(0);
             setDice2(0);
@@ -328,9 +345,9 @@ export default function ParquesColombia() {
       }
     } else {
       if (isPair) {
-        setHint(`✨ ¡PARES! Mueve y tira de nuevo`);
+        setHint(L.rollAgainPairs);
       } else {
-        setHint(`🎯 ${dice1} + ${value} = Mueve fichas`);
+        setHint(L.sumMove(dice1, value));
       }
     }
   }
@@ -344,7 +361,7 @@ export default function ParquesColombia() {
     
     if (token.pos === -1) {
       if (!isPair) {
-        setHint("Solo sales con pares");
+        setHint(L.exitOnlyPairs);
         return;
       }
       moveToken(tokenIdx, START_POS[currentColor]);
@@ -355,12 +372,12 @@ export default function ParquesColombia() {
     const newPos = calculateNewPosition(token.pos, diceToUse, currentColor);
 
     if (token.pos >= 100 && !canReachHome(token.pos, diceToUse, currentColor)) {
-      setHint("Debes caer exacto en la meta");
+      setHint(L.mustBeExact);
       return;
     }
 
     if (newPos === token.pos) {
-      setHint("No hay movimiento posible");
+      setHint(L.noMove);
       markDiceUsed();
       return;
     }
@@ -372,16 +389,14 @@ export default function ParquesColombia() {
       const capturedPlayer = newPlayers.find(p => p.color === captureResult.capturedColor);
       if (capturedPlayer) {
         const capturedToken = capturedPlayer.tokens.find(t => t.id === captureResult.capturedTokenId);
-        if (capturedToken) {
-          capturedToken.pos = -1;
-        }
+        if (capturedToken) capturedToken.pos = -1;
       }
     }
 
     moveToken(tokenIdx, newPos);
     
     if (captureResult.captured) {
-      setHint(`¡${COLORS[currentColor].label} capturó a ${COLORS[captureResult.capturedColor!].label}! 🎯`);
+      setHint(`¡${COLORS[currentColor].label} ${L.captured} ${COLORS[captureResult.capturedColor!].label}! 🎯`);
     }
 
     markDiceUsed();
@@ -394,16 +409,14 @@ export default function ParquesColombia() {
     if (newPos === 999) {
       newPlayers[playerIdx].finished++;
       newPlayers[playerIdx].tokens.splice(tokenIdx, 1);
-      
       if (newPlayers[playerIdx].tokens.length === 0) {
         setWinner(newPlayers[playerIdx].name);
       } else {
-        setHint(`¡Meta! ${4 - newPlayers[playerIdx].tokens.length}/4`);
+        setHint(`${L.goal} ${L.progress(4 - newPlayers[playerIdx].tokens.length)}`);
       }
     } else {
       newPlayers[playerIdx].tokens[tokenIdx].pos = newPos;
     }
-    
     setPlayers(newPlayers);
   }
 
@@ -415,14 +428,13 @@ export default function ParquesColombia() {
 
     if (newUsed[0] && newUsed[1]) {
       const isPair = dice1 === dice2;
-      
       if (isPair) {
         setTimeout(() => {
           setDice1(0);
           setDice2(0);
           setUsedDice([false, false]);
           setDiceRolled(false);
-          setHint("¡Pares! Tira de nuevo");
+          setHint(L.rollAgainPairs);
         }, 800);
       } else {
         setTimeout(() => passTurn(), 1000);
@@ -438,22 +450,21 @@ export default function ParquesColombia() {
     setDice2(0);
     setUsedDice([false, false]);
     setDiceRolled(false);
-    
     const nextColor = playerOrder[nextIndex];
-    setHint(`Turno: ${COLORS[nextColor].label}`);
+    setHint(`${L.turn}: ${COLORS[nextColor].label}`);
   }
 
   if (winner) {
     return (
       <div className="w-full text-center py-12">
         <h1 className="text-5xl font-bold mb-4 text-yellow-400">
-          🏆 {winner} GANÓ! 🏆
+          {L.wonBanner(winner)}
         </h1>
         <button
           onClick={() => window.location.reload()}
           className="px-6 py-3 bg-gradient-to-r from-yellow-500 to-orange-500 hover:from-yellow-600 hover:to-orange-600 text-white font-bold rounded-lg shadow-lg"
         >
-          Nueva partida
+          {L.newGame}
         </button>
       </div>
     );
@@ -464,7 +475,7 @@ export default function ParquesColombia() {
       <div className="text-center mb-4">
         {gamePhase === "order" ? (
           <div className="inline-block px-6 py-3 rounded-full bg-gradient-to-r from-purple-500/20 to-pink-500/20 border-2 border-purple-500/50 backdrop-blur-sm">
-            <span className="text-lg font-bold text-purple-300">🎲 Orden</span>
+            <span className="text-lg font-bold text-purple-300">{L.orderBadge} {L.order}</span>
           </div>
         ) : (
           <div 
@@ -493,7 +504,7 @@ export default function ParquesColombia() {
         
         {gamePhase === "playing" && (
           <div className="flex justify-center gap-4 text-xs text-gray-400">
-            <span>Meta: {currentPlayer?.finished || 0}/4</span>
+            <span>{L.goalShort}: {currentPlayer?.finished || 0}/4</span>
             {pairAttempts > 0 && <span>{pairAttempts}/3</span>}
           </div>
         )}
@@ -512,6 +523,8 @@ export default function ParquesColombia() {
             currentColor={currentColor}
             onTokenClick={handleTokenClick}
             gamePhase={gamePhase}
+            lang={lang}
+            L={L}
           />
         </div>
 
@@ -520,16 +533,20 @@ export default function ParquesColombia() {
             value={dice1}
             used={usedDice[0]}
             onRoll={handleDice1Roll}
-            label="Dado 1"
+            label={L.die1}
             disabled={diceRolled}
+            lang={lang}
+            L={L}
           />
           <DiceContainer 
             value={dice2}
             used={usedDice[1]}
             onRoll={handleDice2Roll}
-            label="Dado 2"
+            label={L.die2}
             disabled={diceRolled || dice1 === 0}
             waitingForFirst={dice1 === 0}
+            lang={lang}
+            L={L}
           />
         </div>
       </div>
@@ -564,7 +581,9 @@ function DiceContainer({
   onRoll, 
   label,
   disabled = false,
-  waitingForFirst = false
+  waitingForFirst = false,
+  lang,
+  L
 }: { 
   value: number; 
   used: boolean;
@@ -572,6 +591,8 @@ function DiceContainer({
   label: string;
   disabled?: boolean;
   waitingForFirst?: boolean;
+  lang: "es" | "en";
+  L: Record<string, any>;
 }) {
   const diceSize: React.CSSProperties = {
     "--dice-size": "100px",
@@ -594,8 +615,8 @@ function DiceContainer({
           <DiceFace value={value} />
         )}
       </div>
-      {!disabled && value === 0 && <p className="text-xs text-green-500 font-bold animate-bounce">🎲 Lanza</p>}
-      {waitingForFirst && <p className="text-xs text-gray-500 animate-pulse">⏳ Esperando...</p>}
+      {!disabled && value === 0 && <p className="text-xs text-green-500 font-bold animate-bounce">🎲 {L.roll}</p>}
+      {waitingForFirst && <p className="text-xs text-gray-500 animate-pulse">⏳ {L.waiting}</p>}
     </div>
   );
 }
@@ -624,6 +645,8 @@ interface BoardSVGProps {
   currentColor: ColorKey;
   onTokenClick: (idx: number) => void;
   gamePhase: GamePhase;
+  lang: "es" | "en";
+  L: Record<string, any>;
 }
 
 function BoardSVG({
@@ -631,6 +654,8 @@ function BoardSVG({
   currentColor,
   onTokenClick,
   gamePhase,
+  lang,
+  L
 }: BoardSVGProps) {
   const size = 850;
   const cell = 56;
@@ -655,24 +680,16 @@ function BoardSVG({
   };
 
   function getTokenXY(color: ColorKey, pos: number, idx: number): [number, number] {
-    if (pos === -1) {
-      return jailPositions[color][idx];
-    }
-    
-    if (pos === 999) {
-      return [cell * 7.5, cell * 7.5];
-    }
-    
+    if (pos === -1) return jailPositions[color][idx];
+    if (pos === 999) return [cell * 7.5, cell * 7.5];
     if (FINAL_MAP[pos]) {
       const [gridX, gridY] = FINAL_MAP[pos];
       return [gridX * cell + cell / 2, gridY * cell + cell / 2];
     }
-    
     if (BOARD_MAP[pos]) {
       const [gridX, gridY] = BOARD_MAP[pos];
       return [gridX * cell + cell / 2, gridY * cell + cell / 2];
     }
-    
     return [cell * 7.5, cell * 7.5];
   }
 
@@ -703,7 +720,6 @@ function BoardSVG({
       {Object.entries(BOARD_MAP).map(([pos, [x, y]]) => {
         const cellPos = parseInt(pos, 10);
         const fill = BOARD_COLORS[cellPos] || "#e8d4a0";
-        
         return (
           <rect
             key={`cell-${pos}`}
@@ -721,12 +737,10 @@ function BoardSVG({
       {Object.entries(FINAL_MAP).map(([pos, [x, y]]) => {
         const cellPos = parseInt(pos, 10);
         let fill = "#fff";
-        
         if (FINAL_PATHS.red.includes(cellPos)) fill = `${COLORS.red.hex}99`;
         else if (FINAL_PATHS.blue.includes(cellPos)) fill = `${COLORS.blue.hex}99`;
         else if (FINAL_PATHS.green.includes(cellPos)) fill = `${COLORS.green.hex}99`;
         else if (FINAL_PATHS.yellow.includes(cellPos)) fill = `${COLORS.yellow.hex}99`;
-        
         return (
           <rect
             key={`final-${pos}`}
@@ -744,42 +758,34 @@ function BoardSVG({
       <g>
         <circle cx={cell * 7.5} cy={cell * 7.5} r={cell * 1.3} 
                 fill="#ffd700" stroke="#000" strokeWidth="4" />
-        
         <path 
           d={`M ${cell * 7.5} ${cell * 6.2} L ${cell * 6.7} ${cell * 7.5} L ${cell * 8.3} ${cell * 7.5} Z`}
           fill={COLORS.green.hex} stroke="#000" strokeWidth="2"
         />
-        
         <path 
           d={`M ${cell * 8.8} ${cell * 7.5} L ${cell * 7.5} ${cell * 6.7} L ${cell * 7.5} ${cell * 8.3} Z`}
           fill={COLORS.red.hex} stroke="#000" strokeWidth="2"
         />
-        
         <path 
           d={`M ${cell * 6.2} ${cell * 7.5} L ${cell * 7.5} ${cell * 6.7} L ${cell * 7.5} ${cell * 8.3} Z`}
           fill={COLORS.yellow.hex} stroke="#000" strokeWidth="2"
         />
-        
         <path 
           d={`M ${cell * 7.5} ${cell * 8.8} L ${cell * 6.7} ${cell * 7.5} L ${cell * 8.3} ${cell * 7.5} Z`}
           fill={COLORS.blue.hex} stroke="#000" strokeWidth="2"
         />
-        
-        <circle cx={cell * 7.5} cy={cell * 7.5} r={cell * 0.5} 
-                fill="#fff" stroke="#000" strokeWidth="2" />
-        <text x={cell * 7.5} y={cell * 7.7} fontSize="20" fontWeight="bold" 
-              fill="#000" textAnchor="middle">🏆</text>
+        <circle cx={cell * 7.5} cy={cell * 7.5} r={cell * 0.5} fill="#fff" stroke="#000" strokeWidth="2" />
+        <text x={cell * 7.5} y={cell * 7.7} fontSize="20" fontWeight="bold" fill="#000" textAnchor="middle">🏆</text>
       </g>
 
-      <text x={cell * 2} y={cell * 2.5} fontSize="20" fontWeight="bold" fill="#fff" textAnchor="middle">SALIDA</text>
-      <text x={cell * 12.5} y={cell * 2.5} fontSize="20" fontWeight="bold" fill="#fff" textAnchor="middle">SALIDA</text>
-      <text x={cell * 2} y={cell * 12.7} fontSize="20" fontWeight="bold" fill="#fff" textAnchor="middle">SALIDA</text>
-      <text x={cell * 12.5} y={cell * 12.7} fontSize="20" fontWeight="bold" fill="#fff" textAnchor="middle">SALIDA</text>
+      <text x={cell * 2} y={cell * 2.5} fontSize="20" fontWeight="bold" fill="#fff" textAnchor="middle">{L.start}</text>
+      <text x={cell * 12.5} y={cell * 2.5} fontSize="20" fontWeight="bold" fill="#fff" textAnchor="middle">{L.start}</text>
+      <text x={cell * 2} y={cell * 12.7} fontSize="20" fontWeight="bold" fill="#fff" textAnchor="middle">{L.start}</text>
+      <text x={cell * 12.5} y={cell * 12.7} fontSize="20" fontWeight="bold" fill="#fff" textAnchor="middle">{L.start}</text>
 
       {allTokens.map((t) => {
         const isMine = t.color === currentColor && gamePhase === "playing";
         const [x, y] = getTokenXY(t.color, t.pos, t.tokenIdx);
-
         return (
           <g
             key={`token-${t.id}`}

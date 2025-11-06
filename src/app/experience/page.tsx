@@ -1,6 +1,7 @@
 "use client";
 import TokenDecor from "@/components/TokenDecor";
 import { useRef } from "react";
+import { getLangFromSearch, t, Lang } from "@/lib/i18n";
 
 /* Tilt/parallax sutil */
 function useTilt(maxTilt = 7) {
@@ -63,11 +64,19 @@ function MiniReco({
 }
 
 export default function ExperiencePage() {
+  const lang: Lang = getLangFromSearch(
+    typeof window !== "undefined" ? window.location.search : ""
+  );
+
   return (
     <main className="mx-auto max-w-6xl px-4 pb-24">
       <section className="mt-8">
-        <h2 className="text-3xl font-extrabold mb-2 text-slate-900 dark:text-white">Mi Experiencia</h2>
-        <p className="mb-6 text-slate-600 dark:text-slate-300">Proyectos académicos y colaborativos</p>
+        <h2 className="text-3xl font-extrabold mb-2 text-slate-900 dark:text-white">
+          {t(lang, "experience_title")}
+        </h2>
+        <p className="mb-6 text-slate-600 dark:text-slate-300">
+          {t(lang, "experience_intro")}
+        </p>
 
         {/* Timeline con 2023, 2024 y 2025 */}
         <ol className="relative pl-7 md:pl-9">
@@ -77,10 +86,10 @@ export default function ExperiencePage() {
             <span className="absolute -left-1 md:-left-1.5 top-1 h-3.5 w-3.5 rounded-full bg-emerald-600 dark:bg-emerald-500 ring-4 ring-emerald-300/40 dark:ring-emerald-400/40" />
             <div className="rounded-2xl border-2 border-slate-200 dark:border-slate-700 bg-white/80 dark:bg-slate-900/60 backdrop-blur-md p-5 shadow-sm hover:shadow-emerald-600/10 transition">
               <h3 className="font-bold text-slate-900 dark:text-slate-100">
-                2023 – Presente · Estudiante de Ingeniería de Software
+                {t(lang, "exp_2023_title")}
               </h3>
               <p className="mt-1 text-slate-600 dark:text-slate-300 text-sm">
-                UI accesible, rendimiento, pruebas y trabajo en equipo.
+                {t(lang, "exp_2023_desc")}
               </p>
             </div>
           </li>
@@ -89,10 +98,10 @@ export default function ExperiencePage() {
             <span className="absolute -left-1 md:-left-1.5 top-1 h-3.5 w-3.5 rounded-full bg-emerald-600 dark:bg-emerald-500 ring-4 ring-emerald-300/40 dark:ring-emerald-400/40" />
             <div className="rounded-2xl border-2 border-slate-200 dark:border-slate-700 bg-white/80 dark:bg-slate-900/60 backdrop-blur-md p-5 shadow-sm hover:shadow-emerald-600/10 transition">
               <h3 className="font-bold text-slate-900 dark:text-slate-100">
-                2024 · Freelance UI y proyectos personales
+                {t(lang, "exp_2024_title")}
               </h3>
               <p className="mt-1 text-slate-600 dark:text-slate-300 text-sm">
-                Diseño e implementación de interfaces modernas con escalabilidad y SEO.
+                {t(lang, "exp_2024_desc")}
               </p>
             </div>
           </li>
@@ -101,10 +110,10 @@ export default function ExperiencePage() {
             <span className="absolute -left-1 md:-left-1.5 top-1 h-3.5 w-3.5 rounded-full bg-emerald-600 dark:bg-emerald-500 ring-4 ring-emerald-300/40 dark:ring-emerald-400/40" />
             <div className="rounded-2xl border-2 border-slate-200 dark:border-slate-700 bg-white/80 dark:bg-slate-900/60 backdrop-blur-md p-5 shadow-sm hover:shadow-emerald-600/10 transition">
               <h3 className="font-bold text-slate-900 dark:text-slate-100">
-                2025 · Aprendizaje continuo y consolidación
+                {t(lang, "exp_2025_title")}
               </h3>
               <p className="mt-1 text-slate-600 dark:text-slate-300 text-sm">
-                Profundizando en patrones, accesibilidad avanzada y buenas prácticas de desarrollo.
+                {t(lang, "exp_2025_desc")}
               </p>
             </div>
           </li>
@@ -113,27 +122,27 @@ export default function ExperiencePage() {
         {/* Recomendaciones (4 ítems, compactas) */}
         <div className="mt-8 grid sm:grid-cols-2 lg:grid-cols-4 gap-4">
           <MiniReco
-            name="Compañero — Equipo UI"
-            role="Colaborador"
-            quote="Excelente colaboración y atención al detalle en interfaces."
+            name={t(lang, "rec_1_name")}
+            role={t(lang, "rec_1_role")}
+            quote={t(lang, "rec_1_quote")}
             color="yellow"
           />
           <MiniReco
-            name="Profesor — Ing. Software"
-            role="Docente"
-            quote="Compromiso, mejora continua y código limpio."
+            name={t(lang, "rec_2_name")}
+            role={t(lang, "rec_2_role")}
+            quote={t(lang, "rec_2_quote")}
             color="blue"
           />
           <MiniReco
-            name="Compañera — Proyecto académico"
-            role="Desarrollo"
-            quote="Comunicación clara, organización y entregas a tiempo."
+            name={t(lang, "rec_3_name")}
+            role={t(lang, "rec_3_role")}
+            quote={t(lang, "rec_3_quote")}
             color="green"
           />
           <MiniReco
-            name="Tutor — Laboratorio"
-            role="Mentoría"
-            quote="Buena resolución de problemas y actitud proactiva."
+            name={t(lang, "rec_4_name")}
+            role={t(lang, "rec_4_role")}
+            quote={t(lang, "rec_4_quote")}
             color="red"
           />
         </div>

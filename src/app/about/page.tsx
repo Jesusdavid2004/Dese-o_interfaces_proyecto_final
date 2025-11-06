@@ -1,6 +1,12 @@
-import Image from "next/image"
+"use client";
+import Image from "next/image";
+import { getLangFromSearch, t, Lang } from "@/lib/i18n";
 
 export default function AboutPage() {
+  const lang: Lang = getLangFromSearch(
+    typeof window !== "undefined" ? window.location.search : ""
+  );
+
   return (
     <main className="mx-auto max-w-6xl px-4 pb-12">
       <section className="mt-6">
@@ -13,20 +19,18 @@ export default function AboutPage() {
 
           {/* Contenido principal */}
           <div className="relative px-6 md:px-10 py-7 md:py-10 bg-white/75 dark:bg-black/30 backdrop-blur-md">
-            
             {/* Encabezado */}
             <div className="text-center mb-6">
               <h1 className="text-2xl md:text-4xl font-extrabold text-transparent bg-clip-text bg-gradient-to-r from-slate-700 to-emerald-600 dark:from-slate-300 dark:to-emerald-400 mb-2">
-                Hola, soy Jesús David Villota Arteaga
+                {t(lang, "about_hello")}
               </h1>
               <div className="text-lg font-bold text-slate-600 dark:text-emerald-300">
-                Desarrollador Creativo & Problem Solver
+                {t(lang, "about_role")}
               </div>
             </div>
 
             {/* Layout principal */}
             <div className="grid grid-cols-1 md:grid-cols-12 gap-6 items-center">
-              
               {/* Foto */}
               <div className="md:col-span-4 flex justify-center">
                 <div className="relative group">
@@ -36,7 +40,7 @@ export default function AboutPage() {
                   <div className="relative w-[220px] h-[220px] md:w-[260px] md:h-[260px] rounded-full overflow-hidden shadow-lg border-4 border-white dark:border-slate-700">
                     <Image
                       src="/images/me.jpg"
-                      alt="Jesús David Villota Arteaga"
+                      alt={t(lang, "about_photo_alt")}
                       width={260}
                       height={260}
                       className="object-cover"
@@ -51,13 +55,20 @@ export default function AboutPage() {
                 {/* Texto descriptivo */}
                 <div className="space-y-3">
                   <p className="text-sm md:text-base leading-relaxed text-gray-800 dark:text-gray-200">
-                    <span className="font-semibold text-slate-700 dark:text-emerald-300">Soy estudiante de Ingeniería de Software</span> apasionado por crear experiencias digitales excepcionales. Combino creatividad técnica con metodologías ágiles para desarrollar soluciones escalables y de alto impacto.
+                    <span className="font-semibold text-slate-700 dark:text-emerald-300">
+                      {t(lang, "about_p1_strong")}
+                    </span>{" "}
+                    {t(lang, "about_p1_rest")}
                   </p>
                   <p className="text-sm md:text-base leading-relaxed text-gray-800 dark:text-gray-200">
-                    Manejo tanto <span className="font-semibold text-slate-700 dark:text-emerald-300">frontend como backend</span>, desarrollando interfaces intuitivas y robustas. Trabajo con bases de datos complejas, garantizando código limpio con testing automatizado y las mejores prácticas en desarrollo.
+                    {t(lang, "about_p2_pre")}{" "}
+                    <span className="font-semibold text-slate-700 dark:text-emerald-300">
+                      {t(lang, "about_p2_strong")}
+                    </span>
+                    {t(lang, "about_p2_post")}
                   </p>
                   <p className="text-sm md:text-base leading-relaxed text-gray-800 dark:text-gray-200">
-                    Soy <span className="italic text-emerald-600 dark:text-emerald-300">curioso, autodidacta y orientado a resultados</span>. Me encanta colaborar en equipos ágiles, resolver problemas complejos y siempre busco mejorar la calidad del código. Estoy comprometido con crear soluciones innovadoras que generen valor real a los usuarios y al negocio.
+                    {t(lang, "about_p3")}
                   </p>
                 </div>
 
@@ -66,19 +77,19 @@ export default function AboutPage() {
                   {/* Stack Tecnológico */}
                   <div className="bg-gradient-to-br from-slate-100 to-gray-50 dark:from-slate-800 dark:to-slate-700 rounded-xl shadow-sm p-4 border-2 border-emerald-400 dark:border-emerald-500 hover:shadow-md transition-shadow">
                     <h4 className="font-bold text-emerald-700 dark:text-emerald-300 text-sm mb-2 flex items-center gap-2">
-                      <span>⚙️</span> Stack Tecnológico
+                      <span>⚙️</span> {t(lang, "about_stack_title")}
                     </h4>
                     <p className="text-xs text-slate-700 dark:text-slate-200 leading-snug">
-                      React • Next.js • Angular • TypeScript • Node.js • Python • Java • MySQL • MongoDB • Jest
+                      {t(lang, "about_stack_list")}
                     </p>
                   </div>
                   {/* Herramientas */}
                   <div className="bg-gradient-to-br from-emerald-50 to-slate-50 dark:from-slate-800 dark:to-slate-700 rounded-xl shadow-sm p-4 border-2 border-emerald-400 dark:border-emerald-500 hover:shadow-md transition-shadow">
                     <h4 className="font-bold text-emerald-700 dark:text-emerald-300 text-sm mb-2 flex items-center gap-2">
-                      <span>🎯</span> Herramientas
+                      <span>🎯</span> {t(lang, "about_tools_title")}
                     </h4>
                     <p className="text-xs text-emerald-900 dark:text-slate-200 leading-snug">
-                      Figma • Vercel • GitHub • Tailwind CSS • Testing • DevTools • AWS
+                      {t(lang, "about_tools_list")}
                     </p>
                   </div>
                 </div>
@@ -90,15 +101,14 @@ export default function AboutPage() {
                     download
                     className="px-8 py-2.5 bg-gradient-to-r from-slate-600 to-emerald-600 hover:from-slate-700 hover:to-emerald-700 text-white text-sm md:text-base font-bold rounded-full shadow-md hover:shadow-lg transition-all duration-300 transform hover:scale-105 flex items-center gap-2"
                   >
-                    <span>📥</span> Descargar CV
+                    <span>📥</span> {t(lang, "about_download_cv")}
                   </a>
                 </div>
-
               </div>
             </div>
           </div>
         </div>
       </section>
     </main>
-  )
+  );
 }

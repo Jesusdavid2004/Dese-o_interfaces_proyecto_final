@@ -804,3 +804,65 @@ nav {
 @media (max-width: 640px) {
   main { padding-bottom: 0.5rem; }
 }
+/* Idioma + Tema en la derecha del header */
+.header-actions {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;           /* espacio entre ThemeToggle y LangSwitch */
+}
+
+/* Pastilla compacta para el selector de idioma */
+.lang-switch {
+  display: inline-flex;
+  align-items: center;
+  gap: 2px;
+  padding: 2px;
+  border-radius: 9999px;
+  border: 1px solid rgba(148, 163, 184, 0.35);  /* slate-400-ish */
+  background: rgba(255,255,255,0.08);
+  backdrop-filter: blur(6px);
+}
+
+html.light .lang-switch {
+  background: rgba(255,255,255,0.65);
+  border-color: rgba(148, 163, 184, 0.45);
+}
+
+/* Botones ES / EN */
+.lang-switch button {
+  appearance: none;
+  border: 0;
+  background: transparent;
+  color: inherit;
+  font: inherit;
+  padding: 6px 10px;
+  border-radius: 9999px;
+  line-height: 1;
+  cursor: pointer;
+  transition: background-color .2s ease, color .2s ease;
+  color: #e5e7eb;       /* slate-200 */
+}
+
+html.light .lang-switch button {
+  color: #334155;       /* slate-700 */
+}
+
+.lang-switch button.active {
+  background: linear-gradient(135deg, #10B981 0%, #22D3EE 100%);
+  color: white;
+}
+
+.lang-switch button:hover:not(.active) {
+  background: rgba(148,163,184,0.18);
+}
+
+html.light .lang-switch button:hover:not(.active) {
+  background: rgba(148,163,184,0.22);
+}
+
+/* Alineación del contenedor del header si lo necesitas */
+.header-right {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+}

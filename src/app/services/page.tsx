@@ -1,50 +1,52 @@
 "use client";
 import React, { useEffect, useRef } from "react";
 import { Bolt, Code2, Palette, FlaskConical, Rocket, Server } from "lucide-react";
+import Link from "next/link";
+import { getLangFromSearch, t, Lang } from "@/lib/i18n";
 
 type Accent = "emerald" | "blue" | "amber" | "violet" | "rose";
 
 type Service = {
   icon: React.ReactNode;
-  title: string;
-  desc: string;
-  chips: string[];
+  titleKey: string;   // clave i18n
+  descKey: string;    // clave i18n
+  chips: string[];    // chips suelen ser nombres propios; si quieres traducirlos, usa claves también
   accent: Accent;
 };
 
 const services: Service[] = [
   {
     icon: <Code2 className="h-5 w-5" />,
-    title: "Desarrollo Web",
-    desc: "Construcción de aplicaciones web modernas y escalables con enfoque en rendimiento, accesibilidad y buenas prácticas de código.",
+    titleKey: "svc_web_title",
+    descKey: "svc_web_desc",
     chips: ["Next.js", "React", "TypeScript", "Tailwind CSS", "Vercel"],
     accent: "emerald",
   },
   {
     icon: <Server className="h-5 w-5" />,
-    title: "Backend & APIs",
-    desc: "Diseño e implementación de APIs seguras y eficientes con integración a bases de datos modernas y servicios externos.",
+    titleKey: "svc_backend_title",
+    descKey: "svc_backend_desc",
     chips: ["Node.js", "Express", "MongoDB", "REST API", "JWT"],
     accent: "rose",
   },
   {
     icon: <Palette className="h-5 w-5" />,
-    title: "Diseño UI / UX",
-    desc: "Diseño de interfaces y prototipos centrados en la experiencia de usuario: wireframes, sistemas de diseño y accesibilidad.",
+    titleKey: "svc_design_title",
+    descKey: "svc_design_desc",
     chips: ["Figma", "Prototipos", "Design System", "A11y"],
     accent: "violet",
   },
   {
     icon: <FlaskConical className="h-5 w-5" />,
-    title: "Pruebas y QA",
-    desc: "Estrategias de testing para garantizar calidad: unitarias, integración y componentes con cobertura confiable.",
+    titleKey: "svc_qa_title",
+    descKey: "svc_qa_desc",
     chips: ["Jest", "RTL", "Integración", "Casos de prueba"],
     accent: "amber",
   },
   {
     icon: <Rocket className="h-5 w-5" />,
-    title: "CI/CD y Despliegue",
-    desc: "Automatización de pipelines y despliegues confiables para staging y producción, optimizando ciclos de release.",
+    titleKey: "svc_cicd_title",
+    descKey: "svc_cicd_desc",
     chips: ["GitHub Actions", "Vercel", "Docker", "Versionado"],
     accent: "blue",
   },
@@ -105,7 +107,7 @@ function accentClasses(a: Accent) {
   }
 }
 
-function ServiceCard({ s }: { s: Service }) {
+function ServiceCard({ s, lang }: { s: Service; lang: Lang }) {
   const { ref, onMouseMove, onMouseLeave } = useTilt(9);
   const ac = accentClasses(s.accent);
 
@@ -122,10 +124,12 @@ function ServiceCard({ s }: { s: Service }) {
         <span className={`absolute right-3 top-3 h-3 w-3 rounded-full ${ac?.dot} opacity-80`} />
         <div className="flex items-center gap-3" style={{ transform: "translateZ(18px)" }}>
           <div className={`h-10 w-10 grid place-items-center rounded-xl ring-2 ${ac?.ring} bg-white/70 dark:bg-slate-800`}>{s.icon}</div>
-          <h3 className="text-lg font-extrabold tracking-tight text-slate-900 dark:text-slate-100">{s.title}</h3>
+          <h3 className="text-lg font-extrabold tracking-tight text-slate-900 dark:text-slate-100">
+            {t(lang, s.titleKey)}
+          </h3>
         </div>
         <p className="mt-2 text-[15px] leading-relaxed text-slate-700 dark:text-slate-300" style={{ transform: "translateZ(14px)" }}>
-          {s.desc}
+          {t(lang, s.descKey)}
         </p>
         <div className="mt-3 flex flex-wrap gap-2" style={{ transform: "translateZ(12px)" }}>
           {s.chips.map((c, i) => (
@@ -135,14 +139,13 @@ function ServiceCard({ s }: { s: Service }) {
           ))}
         </div>
         <div className="mt-auto pt-4">
-          {/* CTA que siempre funciona con ruta en inglés */}
-          <a
-            href="/contact#form"
+          <Link
+            href={{ pathname: "/contact", query: { lang }, hash: "form" }}
             className={`inline-flex items-center gap-2 text-sm font-semibold ${ac?.text} hover:underline`}
             style={{ transform: "translateZ(10px)" }}
           >
-            ¿Lo hacemos realidad? <span aria-hidden>→</span>
-          </a>
+            {t(lang, "cta_make_it")} <span aria-hidden>→</span>
+          </Link>
         </div>
       </div>
     </div>
@@ -151,20 +154,23 @@ function ServiceCard({ s }: { s: Service }) {
 
 export default function ServicesPage() {
   const revealRef = useReveal();
+  const lang: Lang = getLangFromSearch(typeof window !== "undefined" ? window.location.search : "");
 
   return (
     <main className="mx-auto max-w-6xl px-4 pb-24">
       <section ref={revealRef} className="mt-8">
         <div className="flex items-center gap-2 mb-4">
           <Bolt className="h-6 w-6 text-emerald-500" />
-          <h2 className="text-3xl font-extrabold text-slate-900 dark:text-white">Servicios que ofrezco</h2>
+          <h2 className="text-3xl font-extrabold text-slate-900 dark:text-white">
+            {t(lang, "services_title")}
+          </h2>
         </div>
         <p className="mb-6 text-slate-700 dark:text-slate-300">
-          Soluciones enfocadas en impacto real: desarrollo, rendimiento, diseño y despliegues confiables.
+          {t(lang, "services_intro")}
         </p>
         <div className="grid sm:grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5 auto-rows-[1fr]">
           {services.map((s) => (
-            <ServiceCard key={s.title} s={s} />
+            <ServiceCard key={s.titleKey} s={s} lang={lang} />
           ))}
         </div>
       </section>
