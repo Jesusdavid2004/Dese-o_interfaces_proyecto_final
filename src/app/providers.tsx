@@ -21,9 +21,10 @@ export function Providers({ children }: { children: ReactNode }) {
       };
       syncLang();
       window.addEventListener("popstate", syncLang);
-      window.addEventListener("pushstate", syncLang as any);
-      window.addEventListener("replacestate", syncLang as any);
-    } catch {}
+      // Los eventos pushstate/replacestate no existen por defecto, así que no los tipamos ni añadimos
+    } catch {
+      // no-op
+    }
   }, []);
 
   return (
@@ -31,13 +32,9 @@ export function Providers({ children }: { children: ReactNode }) {
       {!mounted && <OverlayLoader />}
       <BackgroundFX />
       <CursorFX />
-
       {/* ✅ Todo lo que use useTheme debe ir debajo de ThemeProvider */}
       {mounted && <SiteNav />}
-
-      <main className="relative z-10 w-full flex-1 overflow-y-auto">
-        {children}
-      </main>
+      <main className="relative z-10 w-full flex-1 overflow-y-auto">{children}</main>
     </ThemeProvider>
   );
 }

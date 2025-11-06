@@ -64,7 +64,8 @@ export function ThemeProvider({
           attribute
         );
       } else {
-        const resolvedTheme = defaultTheme === "system" ? (getSystemPrefersDark() ? "dark" : "light") : defaultTheme;
+        const resolvedTheme =
+          defaultTheme === "system" ? (getSystemPrefersDark() ? "dark" : "light") : defaultTheme;
         applyThemeToDocument(resolvedTheme, attribute);
       }
     } catch (err) {
@@ -75,9 +76,7 @@ export function ThemeProvider({
 
   useEffect(() => {
     if (!mounted) return;
-
     applyThemeToDocument(theme, attribute);
-
     try {
       localStorage.setItem("theme:choice", raw);
     } catch (err) {
@@ -90,7 +89,6 @@ export function ThemeProvider({
 
     const mql = window.matchMedia("(prefers-color-scheme: dark)");
 
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const handler = (): void => {
       applyThemeToDocument(mql.matches ? "dark" : "light", attribute);
     };
@@ -99,10 +97,10 @@ export function ThemeProvider({
       mql.addEventListener("change", handler);
     } catch {
       try {
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        (mql as any).addListener(handler);
+        // Fallback para navegadores antiguos
+        (mql as unknown as { addListener: (cb: () => void) => void }).addListener(handler);
       } catch {
-        // Fallback
+        // no-op
       }
     }
 
@@ -111,10 +109,10 @@ export function ThemeProvider({
         mql.removeEventListener("change", handler);
       } catch {
         try {
-          // eslint-disable-next-line @typescript-eslint/no-explicit-any
-          (mql as any).removeListener(handler);
+          // Fallback para navegadores antiguos
+          (mql as unknown as { removeListener: (cb: () => void) => void }).removeListener(handler);
         } catch {
-          // Fallback
+          // no-op
         }
       }
     };

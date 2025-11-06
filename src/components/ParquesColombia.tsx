@@ -3,12 +3,11 @@
 import { useState } from "react";
 import Dice3D from "@/components/Dice3D";
 import { useSearchParams } from "next/navigation";
-import type { Lang } from "@/lib/i18n";
 
 type ColorKey = "red" | "blue" | "green" | "yellow";
 type Token = { pos: number; id: string };
-type Player = { 
-  color: ColorKey; 
+type Player = {
+  color: ColorKey;
   name: string;
   tokens: Token[];
   turnsWithoutPairs: number;
@@ -18,9 +17,9 @@ type Player = {
 type GamePhase = "order" | "playing";
 
 const COLORS: Record<ColorKey, { hex: string; label: string }> = {
-  red:    { hex: "#ef4444", label: "ROJO" },
-  blue:   { hex: "#3b82f6", label: "AZUL" },
-  green:  { hex: "#22c55e", label: "VERDE" },
+  red: { hex: "#ef4444", label: "ROJO" },
+  blue: { hex: "#3b82f6", label: "AZUL" },
+  green: { hex: "#22c55e", label: "VERDE" },
   yellow: { hex: "#fbbf24", label: "AMARILLO" },
 };
 
@@ -66,7 +65,7 @@ const FINAL_PATHS: Record<ColorKey, number[]> = {
 };
 
 const FINAL_MAP: Record<number, [number, number]> = {
-  100: [13, 7], 101: [12, 7], 102: [11, 7], 103: [10, 7], 
+  100: [13, 7], 101: [12, 7], 102: [11, 7], 103: [10, 7],
   104: [9, 7], 105: [8, 7], 106: [7, 7], 107: [7, 7],
   110: [7, 13], 111: [7, 12], 112: [7, 11], 113: [7, 10],
   114: [7, 9], 115: [7, 8], 116: [7, 7], 117: [7, 7],
@@ -77,25 +76,24 @@ const FINAL_MAP: Record<number, [number, number]> = {
 };
 
 const START_POS: Record<ColorKey, number> = {
-  red: 63, blue: 21, green: 49, yellow: 35
+  red: 63,
+  blue: 21,
+  green: 49,
+  yellow: 35,
 };
 
 const LAST_SAFE_BEFORE_HOME: Record<ColorKey, number> = {
   red: 67,
   blue: 25,
   green: 53,
-  yellow: 39
+  yellow: 39,
 };
 
 const SAFE_CELLS = new Set([15, 25, 29, 39, 43, 53, 57, 67]);
 
 // ==================== FUNCIONES DE MOVIMIENTO ====================
 
-function calculateNewPosition(
-  currentPos: number,
-  steps: number,
-  color: ColorKey
-): number {
+function calculateNewPosition(currentPos: number, steps: number, color: ColorKey): number {
   if (currentPos === -1) return -1;
   if (currentPos === 999) return 999;
 
@@ -138,22 +136,14 @@ function checkCapture(
     if (player.color === capturingColor) continue;
     for (const token of player.tokens) {
       if (token.pos === newPos && token.pos !== -1) {
-        return { 
-          captured: true, 
-          capturedTokenId: token.id,
-          capturedColor: player.color
-        };
+        return { captured: true, capturedTokenId: token.id, capturedColor: player.color };
       }
     }
   }
   return { captured: false };
 }
 
-function canReachHome(
-  currentPos: number,
-  steps: number,
-  color: ColorKey
-): boolean {
+function canReachHome(currentPos: number, steps: number, color: ColorKey): boolean {
   if (currentPos >= 100) {
     const finalPath = FINAL_PATHS[color];
     const currentIdx = finalPath.indexOf(currentPos);
@@ -163,21 +153,63 @@ function canReachHome(
   return true;
 }
 
+// --------- Tipos de UI para eliminar any ---------
+type UIStrings = {
+  order: string;
+  orderHint: string;
+  begins: string;
+  pointsNext: string;
+  pairs: string;
+  takeOut: string;
+  noPairs: string;
+  attemptsLeft: (n: number) => string;
+  threeNoPairs: string;
+  moveTokens: string;
+  rollAgainPairs: string;
+  exitOnlyPairs: string;
+  mustBeExact: string;
+  noMove: string;
+  captured: string;
+  goal: string;
+  progress: (n: number) => string;
+  winner: string;
+  newGame: string;
+  turn: string;
+  goalShort: string;
+  attemptsShort: string;
+  waiting: string;
+  roll: string;
+  die1: string;
+  die2: string;
+  start: string;
+  orderBadge: string;
+  orderLabel: (c: string) => string;
+  sumLabel: (c: string, sum: number) => string;
+  pairsMsg: (d1: number, d2: number) => string;
+  pairsAgain: string;
+  sumMove: (a: number, b: number) => string;
+  wonBanner: (name: string) => string;
+};
+
 export default function ParquesColombia() {
   const sp = useSearchParams();
   const lang = ((sp?.get("lang") || "es").toLowerCase() === "en" ? "en" : "es") as "es" | "en";
 
   // i18n helper
-  const L = {
+  const L: UIStrings = {
     order: lang === "en" ? "Order" : "Orden",
-    orderHint: lang === "en" ? "Determine order: Each player rolls the dice" : "Determinar orden: Cada jugador lanza los dados",
+    orderHint:
+      lang === "en"
+        ? "Determine order: Each player rolls the dice"
+        : "Determinar orden: Cada jugador lanza los dados",
     begins: lang === "en" ? "starts → Roll for PAIRS" : "comienza → Lanza para PARES",
     pointsNext: lang === "en" ? "pts → Next" : "pts → Siguiente",
     pairs: lang === "en" ? "PAIRS" : "PARES",
     takeOut: lang === "en" ? "Take a token out" : "Saca ficha",
     noPairs: lang === "en" ? "No pairs." : "Sin pares.",
-    attemptsLeft: (n: number) => lang === "en" ? `${n} attempts left` : `${n} intentos restantes`,
-    threeNoPairs: lang === "en" ? "3 tries without pairs. Turn passes." : "3 intentos sin pares. Pasa turno.",
+    attemptsLeft: (n: number) => (lang === "en" ? `${n} attempts left` : `${n} intentos restantes`),
+    threeNoPairs:
+      lang === "en" ? "3 tries without pairs. Turn passes." : "3 intentos sin pares. Pasa turno.",
     moveTokens: lang === "en" ? "Move tokens" : "Mueve fichas",
     rollAgainPairs: lang === "en" ? "Pairs! Roll again" : "¡Pares! Tira de nuevo",
     exitOnlyPairs: lang === "en" ? "You only exit with pairs" : "Solo sales con pares",
@@ -197,66 +229,69 @@ export default function ParquesColombia() {
     die2: lang === "en" ? "Die 2" : "Dado 2",
     start: lang === "en" ? "START" : "SALIDA",
     orderBadge: "🎲",
-    orderLabel: (c: string) => lang === "en" ? `Order: ${c} starts → Roll for PAIRS` : `🎮 Orden: ${c} comienza → Lanza para PARES`,
-    sumLabel: (c: string, sum: number) => lang === "en" ? `${c}: ${sum} pts → Next` : `🔢 ${c}: ${sum} pts → Siguiente`,
-    pairsMsg: (d1: number, d2: number) => lang === "en" ? `✨ PAIRS! ${d1} = ${d2} → ${L.takeOut}` : `✨ ¡PARES! ${d1} = ${d2} → ${L.takeOut}`,
+    orderLabel: (c: string) =>
+      lang === "en" ? `Order: ${c} starts → Roll for PAIRS` : `🎮 Orden: ${c} comienza → Lanza para PARES`,
+    sumLabel: (c: string, sum: number) =>
+      lang === "en" ? `${c}: ${sum} pts → Next` : `🔢 ${c}: ${sum} pts → Siguiente`,
+    pairsMsg: (d1: number, d2: number) =>
+      lang === "en" ? `✨ PAIRS! ${d1} = ${d2} → ${L.takeOut}` : `✨ ¡PARES! ${d1} = ${d2} → ${L.takeOut}`,
     pairsAgain: lang === "en" ? "✨ PAIRS! Move and roll again" : "✨ ¡PARES! Mueve y tira de nuevo",
-    sumMove: (a: number, b: number) => lang === "en" ? `🎯 ${a} + ${b} = ${L.moveTokens}` : `🎯 ${a} + ${b} = ${L.moveTokens}`,
-    wonBanner: (name: string) => lang === "en" ? `🏆 ${name} WON! 🏆` : `🏆 ${name} GANÓ! 🏆`,
+    sumMove: (a: number, b: number) => (lang === "en" ? `🎯 ${a} + ${b} = ${L.moveTokens}` : `🎯 ${a} + ${b} = ${L.moveTokens}`),
+    wonBanner: (name: string) => (lang === "en" ? `🏆 ${name} WON! 🏆` : `🏆 ${name} GANÓ! 🏆`),
   };
 
   const [gamePhase, setGamePhase] = useState<GamePhase>("order");
   const [players, setPlayers] = useState<Player[]>([
-    { 
-      color: "red", 
+    {
+      color: "red",
       name: lang === "en" ? "Player 1" : "Jugador 1",
       tokens: [
-        { pos: -1, id: "r1" }, 
+        { pos: -1, id: "r1" },
         { pos: -1, id: "r2" },
         { pos: -1, id: "r3" },
-        { pos: -1, id: "r4" }
+        { pos: -1, id: "r4" },
       ],
       turnsWithoutPairs: 0,
-      finished: 0
+      finished: 0,
     },
-    { 
-      color: "green", 
+    {
+      color: "green",
       name: lang === "en" ? "Player 2" : "Jugador 2",
       tokens: [
-        { pos: -1, id: "g1" }, 
+        { pos: -1, id: "g1" },
         { pos: -1, id: "g2" },
         { pos: -1, id: "g3" },
-        { pos: -1, id: "g4" }
+        { pos: -1, id: "g4" },
       ],
       turnsWithoutPairs: 0,
-      finished: 0
+      finished: 0,
     },
-    { 
-      color: "yellow", 
+    {
+      color: "yellow",
       name: lang === "en" ? "Player 3" : "Jugador 3",
       tokens: [
-        { pos: -1, id: "y1" }, 
+        { pos: -1, id: "y1" },
         { pos: -1, id: "y2" },
         { pos: -1, id: "y3" },
-        { pos: -1, id: "y4" }
+        { pos: -1, id: "y4" },
       ],
       turnsWithoutPairs: 0,
-      finished: 0
+      finished: 0,
     },
-    { 
-      color: "blue", 
+    {
+      color: "blue",
       name: lang === "en" ? "Player 4" : "Jugador 4",
       tokens: [
-        { pos: -1, id: "b1" }, 
+        { pos: -1, id: "b1" },
         { pos: -1, id: "b2" },
         { pos: -1, id: "b3" },
-        { pos: -1, id: "b4" }
+        { pos: -1, id: "b4" },
       ],
       turnsWithoutPairs: 0,
-      finished: 0
+      finished: 0,
     },
   ]);
-  
+
   const [playerOrder, setPlayerOrder] = useState<ColorKey[]>([]);
   const [currentPlayerIndex, setCurrentPlayerIndex] = useState(0);
   const [dice1, setDice1] = useState<number>(0);
@@ -269,7 +304,7 @@ export default function ParquesColombia() {
   const [pairAttempts, setPairAttempts] = useState(0);
 
   const currentColor = playerOrder[currentPlayerIndex] || "red";
-  const currentPlayer = players.find(p => p.color === currentColor)!;
+  const currentPlayer = players.find((p) => p.color === currentColor)!;
 
   function handleOrderRoll(value: number) {
     if (gamePhase !== "order" || diceRolled) return;
@@ -285,7 +320,7 @@ export default function ParquesColombia() {
 
     if (newRolls.length === 4) {
       const sorted = [...newRolls].sort((a, b) => b.sum - a.sum);
-      const order = sorted.map(r => r.color);
+      const order = sorted.map((r) => r.color);
       setPlayerOrder(order);
       setGamePhase("playing");
       setHint(L.orderLabel(COLORS[order[0]].label));
@@ -316,14 +351,14 @@ export default function ParquesColombia() {
   function handleDice2Roll(value: number) {
     if (gamePhase === "order") return;
     if (diceRolled) return;
-    
+
     setDice2(value);
     setDiceRolled(true);
     setUsedDice([false, false]);
-    
+
     const isPair = dice1 === value;
-    const allInJail = currentPlayer.tokens.every(t => t.pos === -1);
-    
+    const allInJail = currentPlayer.tokens.every((t) => t.pos === -1);
+
     if (allInJail) {
       if (isPair) {
         setHint(L.pairsMsg(dice1, value));
@@ -358,7 +393,7 @@ export default function ParquesColombia() {
     const token = currentPlayer.tokens[tokenIdx];
     const diceToUse = !usedDice[0] ? dice1 : dice2;
     const isPair = dice1 === dice2;
-    
+
     if (token.pos === -1) {
       if (!isPair) {
         setHint(L.exitOnlyPairs);
@@ -386,15 +421,15 @@ export default function ParquesColombia() {
 
     const newPlayers = [...players];
     if (captureResult.captured && captureResult.capturedTokenId) {
-      const capturedPlayer = newPlayers.find(p => p.color === captureResult.capturedColor);
+      const capturedPlayer = newPlayers.find((p) => p.color === captureResult.capturedColor);
       if (capturedPlayer) {
-        const capturedToken = capturedPlayer.tokens.find(t => t.id === captureResult.capturedTokenId);
+        const capturedToken = capturedPlayer.tokens.find((t) => t.id === captureResult.capturedTokenId);
         if (capturedToken) capturedToken.pos = -1;
       }
     }
 
     moveToken(tokenIdx, newPos);
-    
+
     if (captureResult.captured) {
       setHint(`¡${COLORS[currentColor].label} ${L.captured} ${COLORS[captureResult.capturedColor!].label}! 🎯`);
     }
@@ -404,8 +439,8 @@ export default function ParquesColombia() {
 
   function moveToken(tokenIdx: number, newPos: number) {
     const newPlayers = [...players];
-    const playerIdx = newPlayers.findIndex(p => p.color === currentColor);
-    
+    const playerIdx = newPlayers.findIndex((p) => p.color === currentColor);
+
     if (newPos === 999) {
       newPlayers[playerIdx].finished++;
       newPlayers[playerIdx].tokens.splice(tokenIdx, 1);
@@ -457,9 +492,7 @@ export default function ParquesColombia() {
   if (winner) {
     return (
       <div className="w-full text-center py-12">
-        <h1 className="text-5xl font-bold mb-4 text-yellow-400">
-          {L.wonBanner(winner)}
-        </h1>
+        <h1 className="text-5xl font-bold mb-4 text-yellow-400">{L.wonBanner(winner)}</h1>
         <button
           onClick={() => window.location.reload()}
           className="px-6 py-3 bg-gradient-to-r from-yellow-500 to-orange-500 hover:from-yellow-600 hover:to-orange-600 text-white font-bold rounded-lg shadow-lg"
@@ -478,11 +511,11 @@ export default function ParquesColombia() {
             <span className="text-lg font-bold text-purple-300">{L.orderBadge} {L.order}</span>
           </div>
         ) : (
-          <div 
+          <div
             className="inline-block px-6 py-3 rounded-full border-2 backdrop-blur-sm"
-            style={{ 
+            style={{
               borderColor: COLORS[currentColor].hex,
-              backgroundColor: `${COLORS[currentColor].hex}25`
+              backgroundColor: `${COLORS[currentColor].hex}25`,
             }}
           >
             <span className="text-lg font-bold" style={{ color: COLORS[currentColor].hex }}>
@@ -490,25 +523,30 @@ export default function ParquesColombia() {
             </span>
           </div>
         )}
-        
-        <p className={`text-sm font-semibold mb-1 transition-colors duration-300 ${
-          gamePhase === "order" 
-            ? 'text-gray-700 dark:text-gray-200' 
-            : currentColor === 'red' ? 'text-red-600 dark:text-red-400' :
-              currentColor === 'blue' ? 'text-blue-600 dark:text-blue-400' :
-              currentColor === 'green' ? 'text-green-600 dark:text-green-400' :
-              'text-amber-600 dark:text-amber-400'
-        }`}>
+
+        <p
+          className={`text-sm font-semibold mb-1 transition-colors duration-300 ${
+            gamePhase === "order"
+              ? "text-gray-700 dark:text-gray-200"
+              : currentColor === "red"
+              ? "text-red-600 dark:text-red-400"
+              : currentColor === "blue"
+              ? "text-blue-600 dark:text-blue-400"
+              : currentColor === "green"
+              ? "text-green-600 dark:text-green-400"
+              : "text-amber-600 dark:text-amber-400"
+          }`}
+        >
           {hint}
         </p>
-        
+
         {gamePhase === "playing" && (
           <div className="flex justify-center gap-4 text-xs text-gray-400">
             <span>{L.goalShort}: {currentPlayer?.finished || 0}/4</span>
             {pairAttempts > 0 && <span>{pairAttempts}/3</span>}
           </div>
         )}
-        
+
         {diceRolled && (
           <p className="text-xs text-gray-400 mt-1">
             {dice1} {usedDice[0] ? "✓" : "○"} | {dice2} {usedDice[1] ? "✓" : "○"}
@@ -518,34 +556,31 @@ export default function ParquesColombia() {
 
       <div className="flex flex-col lg:flex-row items-start justify-center gap-6">
         <div className="flex-shrink-0">
-          <BoardSVG 
+          <BoardSVG
             players={players}
             currentColor={currentColor}
             onTokenClick={handleTokenClick}
             gamePhase={gamePhase}
-            lang={lang}
             L={L}
           />
         </div>
 
         <div className="flex flex-row lg:flex-col gap-4">
-          <DiceContainer 
+          <DiceContainer
             value={dice1}
             used={usedDice[0]}
             onRoll={handleDice1Roll}
             label={L.die1}
             disabled={diceRolled}
-            lang={lang}
             L={L}
           />
-          <DiceContainer 
+          <DiceContainer
             value={dice2}
             used={usedDice[1]}
             onRoll={handleDice2Roll}
             label={L.die2}
             disabled={diceRolled || dice1 === 0}
             waitingForFirst={dice1 === 0}
-            lang={lang}
             L={L}
           />
         </div>
@@ -554,14 +589,14 @@ export default function ParquesColombia() {
       {gamePhase === "playing" && playerOrder.length > 0 && (
         <div className="mt-6 flex justify-center gap-2 flex-wrap">
           {playerOrder.map((color, idx) => (
-            <div 
+            <div
               key={color}
               className={`px-4 py-2 rounded-lg border-2 transition-all ${
-                idx === currentPlayerIndex ? 'scale-110' : 'opacity-50'
+                idx === currentPlayerIndex ? "scale-110" : "opacity-50"
               }`}
-              style={{ 
+              style={{
                 borderColor: COLORS[color].hex,
-                backgroundColor: `${COLORS[color].hex}20`
+                backgroundColor: `${COLORS[color].hex}20`,
               }}
             >
               <span className="text-sm font-bold" style={{ color: COLORS[color].hex }}>
@@ -575,36 +610,34 @@ export default function ParquesColombia() {
   );
 }
 
-function DiceContainer({ 
-  value, 
+function DiceContainer({
+  value,
   used,
-  onRoll, 
+  onRoll,
   label,
   disabled = false,
   waitingForFirst = false,
-  lang,
-  L
-}: { 
-  value: number; 
+  L,
+}: {
+  value: number;
   used: boolean;
-  onRoll: (v: number) => void; 
+  onRoll: (v: number) => void;
   label: string;
   disabled?: boolean;
   waitingForFirst?: boolean;
-  lang: "es" | "en";
-  L: Record<string, any>;
+  L: UIStrings;
 }) {
   const diceSize: React.CSSProperties = {
     "--dice-size": "100px",
-    perspective: "1000px"
+    perspective: "1000px",
   } as React.CSSProperties;
 
   return (
     <div className="flex flex-col items-center gap-2">
       <p className="text-xs text-gray-600 dark:text-gray-300 font-semibold uppercase tracking-wide">{label}</p>
-      <div 
+      <div
         className={`relative w-28 h-28 rounded-xl shadow-lg flex items-center justify-center transition-all duration-300 ${
-          used ? 'opacity-40' : 'opacity-100'
+          used ? "opacity-40" : "opacity-100"
         } bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700`}
       >
         {value === 0 ? (
@@ -624,11 +657,36 @@ function DiceContainer({
 function DiceFace({ value }: { value: number }) {
   const dots: Record<number, [number, number][]> = {
     1: [[50, 50]],
-    2: [[30, 30], [70, 70]],
-    3: [[30, 30], [50, 50], [70, 70]],
-    4: [[30, 30], [70, 30], [30, 70], [70, 70]],
-    5: [[30, 30], [70, 30], [50, 50], [30, 70], [70, 70]],
-    6: [[30, 30], [70, 30], [30, 50], [70, 50], [30, 70], [70, 70]],
+    2: [
+      [30, 30],
+      [70, 70],
+    ],
+    3: [
+      [30, 30],
+      [50, 50],
+      [70, 70],
+    ],
+    4: [
+      [30, 30],
+      [70, 30],
+      [30, 70],
+      [70, 70],
+    ],
+    5: [
+      [30, 30],
+      [70, 30],
+      [50, 50],
+      [30, 70],
+      [70, 70],
+    ],
+    6: [
+      [30, 30],
+      [70, 30],
+      [30, 50],
+      [70, 50],
+      [30, 70],
+      [70, 70],
+    ],
   };
 
   return (
@@ -645,37 +703,37 @@ interface BoardSVGProps {
   currentColor: ColorKey;
   onTokenClick: (idx: number) => void;
   gamePhase: GamePhase;
-  lang: "es" | "en";
-  L: Record<string, any>;
+  L: UIStrings;
 }
 
-function BoardSVG({
-  players,
-  currentColor,
-  onTokenClick,
-  gamePhase,
-  lang,
-  L
-}: BoardSVGProps) {
+function BoardSVG({ players, currentColor, onTokenClick, gamePhase, L }: BoardSVGProps) {
   const size = 850;
   const cell = 56;
 
   const jailPositions: Record<ColorKey, [number, number][]> = {
     red: [
-      [cell * 10.5, cell * 0.9], [cell * 12.1, cell * 0.9],
-      [cell * 10.5, cell * 2.5], [cell * 12.1, cell * 2.5]
+      [cell * 10.5, cell * 0.9],
+      [cell * 12.1, cell * 0.9],
+      [cell * 10.5, cell * 2.5],
+      [cell * 12.1, cell * 2.5],
     ],
     yellow: [
-      [cell * 0.9, cell * 10.5], [cell * 2.5, cell * 10.5],
-      [cell * 0.9, cell * 12.1], [cell * 2.5, cell * 12.1]
+      [cell * 0.9, cell * 10.5],
+      [cell * 2.5, cell * 10.5],
+      [cell * 0.9, cell * 12.1],
+      [cell * 2.5, cell * 12.1],
     ],
     green: [
-      [cell * 0.9, cell * 0.9], [cell * 2.5, cell * 0.9],
-      [cell * 0.9, cell * 2.5], [cell * 2.5, cell * 2.5]
+      [cell * 0.9, cell * 0.9],
+      [cell * 2.5, cell * 0.9],
+      [cell * 0.9, cell * 2.5],
+      [cell * 2.5, cell * 2.5],
     ],
     blue: [
-      [cell * 10.5, cell * 10.5], [cell * 12.1, cell * 10.5],
-      [cell * 10.5, cell * 12.1], [cell * 12.1, cell * 12.1]
+      [cell * 10.5, cell * 10.5],
+      [cell * 12.1, cell * 10.5],
+      [cell * 10.5, cell * 12.1],
+      [cell * 12.1, cell * 12.1],
     ],
   };
 
@@ -703,35 +761,20 @@ function BoardSVG({
   );
 
   return (
-    <svg 
-      viewBox={`0 0 ${size} ${size}`} 
+    <svg
+      viewBox={`0 0 ${size} ${size}`}
       className="w-full max-w-[850px] drop-shadow-2xl rounded-2xl"
-      style={{ background: '#d4a574' }}
+      style={{ background: "#d4a574" }}
     >
-      <rect x={0} y={0} width={cell * 4} height={cell * 4} 
-            fill={COLORS.green.hex} stroke="#000" strokeWidth="4" rx="16" />
-      <rect x={cell * 11} y={0} width={cell * 4} height={cell * 4} 
-            fill={COLORS.red.hex} stroke="#000" strokeWidth="4" rx="16" />
-      <rect x={0} y={cell * 11} width={cell * 4} height={cell * 4} 
-            fill={COLORS.yellow.hex} stroke="#000" strokeWidth="4" rx="16" />
-      <rect x={cell * 11} y={cell * 11} width={cell * 4} height={cell * 4} 
-            fill={COLORS.blue.hex} stroke="#000" strokeWidth="4" rx="16" />
+      <rect x={0} y={0} width={cell * 4} height={cell * 4} fill={COLORS.green.hex} stroke="#000" strokeWidth="4" rx="16" />
+      <rect x={cell * 11} y={0} width={cell * 4} height={cell * 4} fill={COLORS.red.hex} stroke="#000" strokeWidth="4" rx="16" />
+      <rect x={0} y={cell * 11} width={cell * 4} height={cell * 4} fill={COLORS.yellow.hex} stroke="#000" strokeWidth="4" rx="16" />
+      <rect x={cell * 11} y={cell * 11} width={cell * 4} height={cell * 4} fill={COLORS.blue.hex} stroke="#000" strokeWidth="4" rx="16" />
 
       {Object.entries(BOARD_MAP).map(([pos, [x, y]]) => {
         const cellPos = parseInt(pos, 10);
         const fill = BOARD_COLORS[cellPos] || "#e8d4a0";
-        return (
-          <rect
-            key={`cell-${pos}`}
-            x={x * cell}
-            y={y * cell}
-            width={cell}
-            height={cell}
-            fill={fill}
-            stroke="#000"
-            strokeWidth="2"
-          />
-        );
+        return <rect key={`cell-${pos}`} x={x * cell} y={y * cell} width={cell} height={cell} fill={fill} stroke="#000" strokeWidth="2" />;
       })}
 
       {Object.entries(FINAL_MAP).map(([pos, [x, y]]) => {
@@ -741,39 +784,15 @@ function BoardSVG({
         else if (FINAL_PATHS.blue.includes(cellPos)) fill = `${COLORS.blue.hex}99`;
         else if (FINAL_PATHS.green.includes(cellPos)) fill = `${COLORS.green.hex}99`;
         else if (FINAL_PATHS.yellow.includes(cellPos)) fill = `${COLORS.yellow.hex}99`;
-        return (
-          <rect
-            key={`final-${pos}`}
-            x={x * cell}
-            y={y * cell}
-            width={cell}
-            height={cell}
-            fill={fill}
-            stroke="#000"
-            strokeWidth="2"
-          />
-        );
+        return <rect key={`final-${pos}`} x={x * cell} y={y * cell} width={cell} height={cell} fill={fill} stroke="#000" strokeWidth="2" />;
       })}
 
       <g>
-        <circle cx={cell * 7.5} cy={cell * 7.5} r={cell * 1.3} 
-                fill="#ffd700" stroke="#000" strokeWidth="4" />
-        <path 
-          d={`M ${cell * 7.5} ${cell * 6.2} L ${cell * 6.7} ${cell * 7.5} L ${cell * 8.3} ${cell * 7.5} Z`}
-          fill={COLORS.green.hex} stroke="#000" strokeWidth="2"
-        />
-        <path 
-          d={`M ${cell * 8.8} ${cell * 7.5} L ${cell * 7.5} ${cell * 6.7} L ${cell * 7.5} ${cell * 8.3} Z`}
-          fill={COLORS.red.hex} stroke="#000" strokeWidth="2"
-        />
-        <path 
-          d={`M ${cell * 6.2} ${cell * 7.5} L ${cell * 7.5} ${cell * 6.7} L ${cell * 7.5} ${cell * 8.3} Z`}
-          fill={COLORS.yellow.hex} stroke="#000" strokeWidth="2"
-        />
-        <path 
-          d={`M ${cell * 7.5} ${cell * 8.8} L ${cell * 6.7} ${cell * 7.5} L ${cell * 8.3} ${cell * 7.5} Z`}
-          fill={COLORS.blue.hex} stroke="#000" strokeWidth="2"
-        />
+        <circle cx={cell * 7.5} cy={cell * 7.5} r={cell * 1.3} fill="#ffd700" stroke="#000" strokeWidth="4" />
+        <path d={`M ${cell * 7.5} ${cell * 6.2} L ${cell * 6.7} ${cell * 7.5} L ${cell * 8.3} ${cell * 7.5} Z`} fill={COLORS.green.hex} stroke="#000" strokeWidth="2" />
+        <path d={`M ${cell * 8.8} ${cell * 7.5} L ${cell * 7.5} ${cell * 6.7} L ${cell * 7.5} ${cell * 8.3} Z`} fill={COLORS.red.hex} stroke="#000" strokeWidth="2" />
+        <path d={`M ${cell * 6.2} ${cell * 7.5} L ${cell * 7.5} ${cell * 6.7} L ${cell * 7.5} ${cell * 8.3} Z`} fill={COLORS.yellow.hex} stroke="#000" strokeWidth="2" />
+        <path d={`M ${cell * 7.5} ${cell * 8.8} L ${cell * 6.7} ${cell * 7.5} L ${cell * 8.3} ${cell * 7.5} Z`} fill={COLORS.blue.hex} stroke="#000" strokeWidth="2" />
         <circle cx={cell * 7.5} cy={cell * 7.5} r={cell * 0.5} fill="#fff" stroke="#000" strokeWidth="2" />
         <text x={cell * 7.5} y={cell * 7.7} fontSize="20" fontWeight="bold" fill="#000" textAnchor="middle">🏆</text>
       </g>
@@ -787,42 +806,14 @@ function BoardSVG({
         const isMine = t.color === currentColor && gamePhase === "playing";
         const [x, y] = getTokenXY(t.color, t.pos, t.tokenIdx);
         return (
-          <g
-            key={`token-${t.id}`}
-            onClick={() => isMine && onTokenClick(t.tokenIdx)}
-            style={{ cursor: isMine ? "pointer" : "default" }}
-          >
+          <g key={`token-${t.id}`} onClick={() => isMine && onTokenClick(t.tokenIdx)} style={{ cursor: isMine ? "pointer" : "default" }}>
             {isMine && (
-              <circle
-                cx={x}
-                cy={y}
-                r={cell * 0.38}
-                fill={COLORS[t.color].hex}
-                opacity="0.4"
-              >
-                <animate
-                  attributeName="r"
-                  values={`${cell * 0.32};${cell * 0.42};${cell * 0.32}`}
-                  dur="1.5s"
-                  repeatCount="indefinite"
-                />
+              <circle cx={x} cy={y} r={cell * 0.38} fill={COLORS[t.color].hex} opacity="0.4">
+                <animate attributeName="r" values={`${cell * 0.32};${cell * 0.42};${cell * 0.32}`} dur="1.5s" repeatCount="indefinite" />
               </circle>
             )}
-            <circle
-              cx={x}
-              cy={y}
-              r={cell * 0.3}
-              fill={COLORS[t.color].hex}
-              stroke="#000"
-              strokeWidth="3"
-              filter="drop-shadow(0 4px 8px rgba(0,0,0,0.5))"
-            />
-            <circle
-              cx={x - cell * 0.1}
-              cy={y - cell * 0.1}
-              r={cell * 0.1}
-              fill="rgba(255,255,255,0.7)"
-            />
+            <circle cx={x} cy={y} r={cell * 0.3} fill={COLORS[t.color].hex} stroke="#000" strokeWidth="3" filter="drop-shadow(0 4px 8px rgba(0,0,0,0.5))" />
+            <circle cx={x - cell * 0.1} cy={y - cell * 0.1} r={cell * 0.1} fill="rgba(255,255,255,0.7)" />
           </g>
         );
       })}
