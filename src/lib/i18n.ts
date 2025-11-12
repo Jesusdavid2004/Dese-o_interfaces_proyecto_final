@@ -17,6 +17,7 @@ export const dict: Record<Lang, Record<string, string>> = {
     nav_hobbies: "Hobbies",
     nav_services: "Servicios",
     nav_contact: "Contacto",
+    brand_portfolio: "Portafolio",
 
     // Home
     home_title: "Lanza el dado y explora mi portafolio",
@@ -147,6 +148,7 @@ export const dict: Record<Lang, Record<string, string>> = {
     nav_hobbies: "Hobbies",
     nav_services: "Services",
     nav_contact: "Contact",
+    brand_portfolio: "Portfolio",
 
     // Home
     home_title: "Roll the die and explore my portfolio",
@@ -272,5 +274,5 @@ export const dict: Record<Lang, Record<string, string>> = {
 export function t(lang: Lang | undefined, key: string) {
   const L = (lang === "en" || lang === "es") ? lang : "es";
   const bag = dict[L] ?? dict.es;
-  return (bag[key] ?? dict.es[key] ?? key);
+  return bag[key] ?? dict.es[key] ?? key;
 }

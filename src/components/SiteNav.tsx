@@ -5,6 +5,7 @@ import Link from "next/link";
 import { useTheme } from "@/app/theme/ThemeProvider";
 import { Menu, X, Sun, Moon } from "lucide-react";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
+import Brand from "./Brand";
 
 export default function SiteNav() {
   const [isOpen, setIsOpen] = useState(false);
@@ -18,7 +19,6 @@ export default function SiteNav() {
   useEffect(() => setMounted(true), []);
   useEffect(() => setIsOpen(false), [pathname]);
 
-  // helper para anexar ?lang a cualquier href
   const withLang = (href: string) => {
     const params = new URLSearchParams(sp?.toString() || "");
     params.set("lang", lang);
@@ -48,12 +48,13 @@ export default function SiteNav() {
   return (
     <nav className="sticky top-0 z-40 backdrop-blur bg-white/80 dark:bg-gray-900/80 border-b border-gray-200 dark:border-gray-800 transition-all duration-300">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4 flex items-center justify-between gap-4">
-        {/* Logo */}
+        {/* Logo traducible */}
         <Link
           href={withLang("/")}
           className="font-display font-bold text-lg text-gray-900 dark:text-white hover:text-purple-600 dark:hover:text-purple-400 transition-colors"
+          aria-label="Home"
         >
-          🎲 Portafolio
+          <Brand />
         </Link>
 
         {/* Menú Desktop */}
@@ -81,7 +82,6 @@ export default function SiteNav() {
 
         {/* Acciones Derecha: Tema + Idioma + Menú móvil */}
         <div className="flex items-center gap-3">
-          {/* Toggle Tema */}
           {mounted && (
             <button
               onClick={toggle}
@@ -97,7 +97,7 @@ export default function SiteNav() {
             </button>
           )}
 
-          {/* Switch ES/EN en formato pill */}
+          {/* Switch ES/EN */}
           <div
             className="relative inline-flex items-center rounded-full border border-slate-300/70 dark:border-slate-700/70 bg-white/70 dark:bg-white/5 backdrop-blur-md p-1 shadow-sm"
             role="group"
