@@ -75,6 +75,15 @@ export const dict: Record<Lang, Record<string, string>> = {
     prj_watch_title: "Reloj Digital en Python",
     prj_watch_desc: "Estilo Apple Watch, con clima y fondo dinámico.",
 
+    // NUEVAS claves (no se elimina nada de arriba)
+    prj_ubication_title: "Ubicación API",
+    prj_ubication_desc: "Utilidad web que detecta ciudad y país a partir de tu IP y muestra la información en vivo.",
+    prj_layout_title: "Maquetación",
+    prj_layout_desc: "Landing responsive con HTML semántico, CSS moderno y componentes reutilizables.",
+    prj_adaptable_title: "Adaptable",
+    prj_adaptable_desc: "Diseño responsive multi‑dispositivo con layout fluido y breakpoints optimizados.",
+    prj_tour_desc_updated: "Prototipo móvil para eventos y rutas del Carnaval; navegación básica y estructura inicial.",
+
     // Hobbies
     hobbies_title: "Un Poco Sobre Mí",
     hobbies_intro: "Haz clic en para conocerme un poco",
@@ -205,6 +214,15 @@ export const dict: Record<Lang, Record<string, string>> = {
     prj_energy_desc: "Real‑time energy consumption panel.",
     prj_watch_title: "Digital Watch in Python",
     prj_watch_desc: "Apple Watch‑style, with weather and dynamic background.",
+
+    // NEW keys (kept originals above)
+    prj_ubication_title: "IP Location API",
+    prj_ubication_desc: "Web utility that detects city and country from your IP and shows live information.",
+    prj_layout_title: "Layout",
+    prj_layout_desc: "Responsive landing with semantic HTML, modern CSS, and reusable components.",
+    prj_adaptable_title: "Adaptable",
+    prj_adaptable_desc: "Responsive design across devices with fluid layout and optimized breakpoints.",
+    prj_tour_desc_updated: "Mobile prototype for Carnival events and routes; basic navigation and initial structure.",
 
     // Hobbies
     hobbies_title: "A bit about me",

@@ -6,26 +6,65 @@ import ParquesColombia from "@/components/ParquesColombia";
 import { t, getLangFromSearch, Lang } from "@/lib/i18n";
 
 type ProjectItem = {
-  titleKey: string;
-  descKey: string;
+  title: string;
+  desc: string;
   darkColor: string;
   lightColor: string;
-  href: string;
+  live?: string;
+  code?: string;
+  hideLive?: boolean;
 };
-
-const leftCol: ProjectItem[] = [
-  { titleKey: "prj_tour_title",  descKey: "prj_tour_desc",  darkColor: "#1F3A52", lightColor: "#3B82F6", href: "#" },
-  { titleKey: "prj_shop_title",  descKey: "prj_shop_desc",  darkColor: "#2A2F4A", lightColor: "#8B5CF6", href: "#" },
-];
-
-const rightCol: ProjectItem[] = [
-  { titleKey: "prj_energy_title", descKey: "prj_energy_desc", darkColor: "#1F4A47", lightColor: "#06B6D4", href: "#" },
-  { titleKey: "prj_watch_title",  descKey: "prj_watch_desc",  darkColor: "#3D2442", lightColor: "#EC4899", href: "#" },
-];
 
 export default function ProjectsClient() {
   const lang: Lang =
     typeof window !== "undefined" ? getLangFromSearch(window.location.search) : "es";
+
+  // Etiquetas de botones desde i18n
+  const liveLabel = t(lang, "btn_view_project"); // ES: Ver proyecto / EN: View project
+  const codeLabel = t(lang, "btn_view_code");    // ES: Ver código / EN: View code
+
+  // Contenido bilingüe con claves nuevas ya añadidas al i18n
+  const leftCol: ProjectItem[] = [
+    {
+      // App de Turismo → solo código
+      title: t(lang, "prj_tour_title"),
+      desc: t(lang, "prj_tour_desc_updated"),
+      darkColor: "#1F3A52",
+      lightColor: "#3B82F6",
+      code: "https://github.com/ghosstbabby12/Carnaval-Conecta",
+      hideLive: true,
+    },
+    {
+      // E-commerce → Ubicación API
+      title: t(lang, "prj_ubication_title"),
+      desc: t(lang, "prj_ubication_desc"),
+      darkColor: "#2A2F4A",
+      lightColor: "#8B5CF6",
+      live: "https://ubication-ip.vercel.app/",
+      code: "https://github.com/Jesusdavid2004/ubication_ip",
+    },
+  ];
+
+  const rightCol: ProjectItem[] = [
+    {
+      // Dashboard Energético → Maquetación
+      title: t(lang, "prj_layout_title"),
+      desc: t(lang, "prj_layout_desc"),
+      darkColor: "#1F4A47",
+      lightColor: "#06B6D4",
+      live: "https://maquetacion-mocha.vercel.app/",
+      code: "https://github.com/Jesusdavid2004/maquetacion",
+    },
+    {
+      // Reloj Digital en Python → Adaptable
+      title: t(lang, "prj_adaptable_title"),
+      desc: t(lang, "prj_adaptable_desc"),
+      darkColor: "#3D2442",
+      lightColor: "#EC4899",
+      live: "https://responsive-three-ashy.vercel.app/",
+      code: "https://github.com/Jesusdavid2004/Responsive",
+    },
+  ];
 
   return (
     <>
@@ -43,34 +82,41 @@ export default function ProjectsClient() {
       <div className="grid md:grid-cols-[1fr_auto_1fr] gap-5 items-start">
         {/* Columna izquierda */}
         <div className="grid gap-3">
-          {leftCol.map((p) => (
+          {leftCol.map((p, i) => (
             <ProjectCard
-              key={p.titleKey}
-              title={t(lang, p.titleKey)}
-              desc={t(lang, p.descKey)}
+              key={`left-${i}`}
+              title={p.title}
+              desc={p.desc}
               darkColor={p.darkColor}
               lightColor={p.lightColor}
-              href={p.href}
+              href={p.live ?? "#"}
+              codeHref={p.code}
+              hideLive={p.hideLive}
+              liveLabel={liveLabel}
+              codeLabel={codeLabel}
             />
           ))}
         </div>
 
         {/* Centro (Parqués) */}
         <div className="card p-6 bg-zinc-900/80 rounded-3xl shadow-2xl backdrop-blur-md flex flex-col items-center justify-center">
-          {/* No pasar lang si el componente no lo declara como prop */}
           <ParquesColombia />
         </div>
 
         {/* Columna derecha */}
         <div className="grid gap-3">
-          {rightCol.map((p) => (
+          {rightCol.map((p, i) => (
             <ProjectCard
-              key={p.titleKey}
-              title={t(lang, p.titleKey)}
-              desc={t(lang, p.descKey)}
+              key={`right-${i}`}
+              title={p.title}
+              desc={p.desc}
               darkColor={p.darkColor}
               lightColor={p.lightColor}
-              href={p.href}
+              href={p.live ?? "#"}
+              codeHref={p.code}
+              hideLive={p.hideLive}
+              liveLabel={liveLabel}
+              codeLabel={codeLabel}
             />
           ))}
         </div>
