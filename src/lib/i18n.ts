@@ -1,4 +1,3 @@
-// src/lib/i18n.ts
 export type Lang = "es" | "en";
 
 export function getLangFromSearch(search: string): Lang {
@@ -50,18 +49,20 @@ export const dict: Record<Lang, Record<string, string>> = {
     exp_2024_desc: "Diseño e implementación de interfaces modernas con escalabilidad y SEO.",
     exp_2025_title: "2025 · Aprendizaje continuo y consolidación",
     exp_2025_desc: "Profundizando en patrones, accesibilidad avanzada y buenas prácticas de desarrollo.",
-    rec_1_name: "Compañero — Equipo UI",
-    rec_1_role: "Colaborador",
-    rec_1_quote: "Excelente colaboración y atención al detalle en interfaces.",
-    rec_2_name: "Profesor — Ing. Software",
-    rec_2_role: "Docente",
-    rec_2_quote: "Compromiso, mejora continua y código limpio.",
-    rec_3_name: "Compañera — Proyecto académico",
-    rec_3_role: "Desarrollo",
-    rec_3_quote: "Comunicación clara, organización y entregas a tiempo.",
-    rec_4_name: "Tutor — Laboratorio",
-    rec_4_role: "Mentoría",
-    rec_4_quote: "Buena resolución de problemas y actitud proactiva.",
+
+    // NUEVAS RECOMENDACIONES PERSONALIZADAS
+    rec_1_name: "Cristiam Ortis",
+    rec_1_role: "Profesor — Electiva 1 Django",
+    rec_1_quote: "Se evidencia proactividad en el desarrollo de los proyectos, se observa un código bien estructurado y un diseño cuidadosamente elaborado. Cada elemento refleja compromiso, atención al detalle y calidad de trabajo, felicitaciones.",
+    rec_2_name: "Evelin Pulsara",
+    rec_2_role: "Compañera de universidad",
+    rec_2_quote: "Es un colaborador excepcional, resolutivo y creativo. Siempre aporta ideas claras al equipo.",
+    rec_3_name: "Camila Bastidas",
+    rec_3_role: "Compañera de universidad",
+    rec_3_quote: "Trabajo eficiente y buena comunicación. Una referencia para cualquier proyecto grupal.",
+    rec_4_name: "Esteban Meneses",
+    rec_4_role: "Compañero de universidad",
+    rec_4_quote: "Responsable y proactivo. Su dedicación marca la diferencia en cualquier equipo.",
 
     // Projects
     projects_title: "Mis Proyectos",
@@ -190,18 +191,20 @@ export const dict: Record<Lang, Record<string, string>> = {
     exp_2024_desc: "Modern interfaces with scalability and SEO.",
     exp_2025_title: "2025 · Continuous learning and consolidation",
     exp_2025_desc: "Deepening patterns, advanced accessibility, and best practices.",
-    rec_1_name: "Teammate — UI Team",
-    rec_1_role: "Collaborator",
-    rec_1_quote: "Great collaboration and attention to UI details.",
-    rec_2_name: "Professor — Software Eng.",
-    rec_2_role: "Faculty",
-    rec_2_quote: "Commitment, continuous improvement, and clean code.",
-    rec_3_name: "Teammate — Academic project",
-    rec_3_role: "Developer",
-    rec_3_quote: "Clear communication, organization, and on-time delivery.",
-    rec_4_name: "Tutor — Lab",
-    rec_4_role: "Mentor",
-    rec_4_quote: "Solid problem solving and proactive attitude.",
+
+    // CUSTOM RECOMMENDATIONS, TRANSLATED
+    rec_1_name: "Cristiam Ortis",
+    rec_1_role: "Professor — Elective 1 Django",
+    rec_1_quote: "Proactivity is evident in project development. The code is well-structured and the design is carefully crafted. Each element reflects commitment, attention to detail, and quality work. Congratulations.",
+    rec_2_name: "Evelin Pulsara",
+    rec_2_role: "University Classmate",
+    rec_2_quote: "An exceptional, resourceful, and creative collaborator. Always brings clear ideas to the team.",
+    rec_3_name: "Camila Bastidas",
+    rec_3_role: "University Classmate",
+    rec_3_quote: "Efficient work and good communication. A reference for any group project.",
+    rec_4_name: "Esteban Meneses",
+    rec_4_role: "University Classmate",
+    rec_4_quote: "Responsible and proactive. His dedication makes a difference to any team.",
 
     // Projects
     projects_title: "My Projects",

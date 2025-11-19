@@ -64,9 +64,10 @@ function MiniReco({
 }
 
 export default function ExperiencePage() {
-  const lang: Lang = getLangFromSearch(
-    typeof window !== "undefined" ? window.location.search : ""
-  );
+  const lang: Lang =
+    typeof window !== "undefined"
+      ? getLangFromSearch(window.location.search)
+      : "es"; // fallback
 
   return (
     <main className="mx-auto max-w-6xl px-4 pb-24">
@@ -119,19 +120,19 @@ export default function ExperiencePage() {
           </li>
         </ol>
 
-        {/* Recomendaciones (4 ítems, compactas) */}
+        {/* Recomendaciones - ahora bilingüe automático */}
         <div className="mt-8 grid sm:grid-cols-2 lg:grid-cols-4 gap-4">
           <MiniReco
             name={t(lang, "rec_1_name")}
             role={t(lang, "rec_1_role")}
             quote={t(lang, "rec_1_quote")}
-            color="yellow"
+            color="blue"
           />
           <MiniReco
             name={t(lang, "rec_2_name")}
             role={t(lang, "rec_2_role")}
             quote={t(lang, "rec_2_quote")}
-            color="blue"
+            color="yellow"
           />
           <MiniReco
             name={t(lang, "rec_3_name")}
