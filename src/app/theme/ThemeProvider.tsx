@@ -1,5 +1,4 @@
 "use client";
-
 import { createContext, useContext, useEffect, useMemo, useState, ReactNode } from "react";
 
 type Theme = "light" | "dark" | "system";
@@ -97,7 +96,7 @@ export function ThemeProvider({
       mql.addEventListener("change", handler);
     } catch {
       try {
-        // Fallback para navegadores antiguos
+        // Fallback
         (mql as unknown as { addListener: (cb: () => void) => void }).addListener(handler);
       } catch {
         // no-op
@@ -109,7 +108,6 @@ export function ThemeProvider({
         mql.removeEventListener("change", handler);
       } catch {
         try {
-          // Fallback para navegadores antiguos
           (mql as unknown as { removeListener: (cb: () => void) => void }).removeListener(handler);
         } catch {
           // no-op
@@ -121,7 +119,6 @@ export function ThemeProvider({
   const setTheme = (t: Theme): void => {
     setRaw(t);
   };
-
   const toggle = (): void => {
     setRaw((prev) => {
       if (prev === "dark") return "light";
@@ -131,11 +128,9 @@ export function ThemeProvider({
   };
 
   const value: Ctx = { theme, raw, setTheme, toggle };
-
   if (!mounted) {
     return <>{children}</>;
   }
-
   return <ThemeCtx.Provider value={value}>{children}</ThemeCtx.Provider>;
 }
 
